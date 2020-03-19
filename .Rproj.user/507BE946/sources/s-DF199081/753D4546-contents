@@ -1,0 +1,91 @@
+---
+title: "JSON"
+author: "jacky wang"
+date: "2019/12/29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+
+opts_chunk$set(echo = TRUE, message = F, warning = F, eval=T)
+
+# windows檔名不要有"-"號
+
+```
+
+```{r package, include=FALSE}
+
+library(readr) #資料匯入
+library(dplyr) #資料整理（slice、select、filter、mutate）
+library(tidyr) #資料整理（gather、spread）
+library(stringr) #處理字串
+library(lubridate) #時間資料處理（ymd）
+library(ggplot2) #作圖
+library(magrittr) # %<>%
+library(showtext) #從字型檔讀取字型，並在繪圖時使用
+
+library(grDevices) #不同色彩空間的十六進制代碼呈現（#598C73）
+library(scales) #show_col()：螢幕立即顯示顏色
+library(colorspace) #調色盤選擇及ggplot應用工具
+library(shiny) #支援套件
+library(shinyjs) #支援套件
+
+library(sf)
+library(osmdata)
+source(file = "D:/Users/User/Documents/GitHub/Rfunction/osmGeomRename.R")
+source("https://www.dropbox.com/s/mdx4777ugnluspz/webApplications.R?dl=1", encoding = "utf-8")
+
+```
+
+
+
+# JSON(JavaScript Object Notation)
+
+JSON是一種網路資料交換的格式。
+
+Java Script變數類型：
+
+  var cars = ["Saab", "Volvo", "BMW"];           // JS array 
+  var length = 16;                               // JS number
+  var lastName = "Johnson";                      // JS string
+  var x = {firstName:"John", lastName:"Doe"};    // JS object
+
+JSON資料：
+  
+  ["Saab", "Volvo", "BMW"]    // JSON Array（R的c(xx, xxx, ...)）
+  
+  // JSON Object（R的list）
+  {
+    "name": "John",   // "key": value   pair
+    "age": 30,
+    "cars": ["Ford", "BMW", "Fiat"]
+  }
+  *JSON是根據JavaScript的物件實字（object literal）發展的
+
+
+## 如何使用JSON資料
+
+```{r}
+
+webapp_project_create(
+  dirlib = "ch7_final",   # 以現在作業位置為準 
+  overwrite = T
+)   # 沒用
+
+```
+
+to rmdTemplate
+
+```{r}
+
+#download.file(
+#  url = "https://www.dropbox.com/s/kxqtxnid7cnneod/flex.Rmd?dl=1", 
+#  destfile = "D:/Users/User/Documents/GitHub/course_practice_datavisualization/class/flex.Rmd"
+#)
+
+```
+
+
+
