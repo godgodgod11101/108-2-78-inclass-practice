@@ -1,0 +1,6 @@
+"0",""
+"0","library(readr)"
+"0","exDataPost80s <- read_csv(""https://www.dropbox.com/s/rc6t40gsxduysz6/exDataPost80s.csv?dl=1"")"
+"0",""
+"0","# 用選的（Import Dataset -> From Text (readr)）引入資料，再到History貼入程式碼（點該行 -> To Source）。"
+"0",""
