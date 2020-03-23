@@ -1,0 +1,17 @@
+"0",""
+"0","library(googlesheets4)"
+"0","library(tidyverse)"
+"0",""
+"0","`出席狀況表單網址` <- ""https://docs.google.com/spreadsheets/d/1oB-5hj1pO5g8FMpZbA7RgIG8NvCRx6WvLPwvleCEV4Q/edit#gid=987577191""    # 缺乏定義值"
+"0",""
+"0","ss <- as_sheets_id(`出席狀況表單網址`)"
+"0",""
+"0","homework_sheet <- sheets_read(ss,sheet=1)"
+"2","Auto-refreshing stale OAuth token.
+"
+"2","Unable to refresh token: invalid_grant
+Token has been expired or revoked."
+"2","Error: Client error: (401) UNAUTHENTICATED
+  * Request not authenticated due to missing, invalid, or expired OAuth token.
+  * Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+"

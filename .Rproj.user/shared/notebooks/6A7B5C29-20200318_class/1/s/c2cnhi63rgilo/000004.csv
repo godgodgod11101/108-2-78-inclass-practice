@@ -3,3 +3,7 @@
 "0","library(dplyr)"
 "0","library(lubridate)"
 "0",""
+"0","# 安裝兩個以上套件"
+"0",""
+"0","#install.packages(c(""googlesheets4"",""tidyverse""))"
+"0",""
