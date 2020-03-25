@@ -1,0 +1,269 @@
+---
+title: "Chapter 3"
+author: "jacky wang"
+date: "2020/3/19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+
+opts_chunk$set(echo = TRUE, message = F, warning = F, eval=T)
+
+# windows檔名不要有"-"號
+
+```
+
+```{r package, include=FALSE}
+
+library(readr) #資料匯入
+library(dplyr) #資料整理（slice、select、filter、mutate）
+library(tidyr) #資料整理（gather、spread）
+library(stringr) #處理字串
+library(lubridate) #時間資料處理（ymd）
+library(ggplot2) #作圖
+library(magrittr) # %<>%
+library(showtext) #從字型檔讀取字型，並在繪圖時使用
+
+library(grDevices) #不同色彩空間的十六進制代碼呈現（#598C73）
+library(scales) #show_col()：螢幕立即顯示顏色
+library(colorspace) #調色盤選擇及ggplot應用工具
+library(shiny) #支援套件
+library(shinyjs) #支援套件
+
+library(sf)
+library(osmdata)
+source(file = "D:/Users/User/Documents/GitHub/Rfunction/osmGeomRename.R")
+source("https://www.dropbox.com/s/mdx4777ugnluspz/webApplications.R?dl=1", encoding = "utf-8")
+
+```
+
+
+
+
+
+# packages
+
+```{r}
+
+library(googlesheets4)
+library(dplyr)
+library(lubridate)
+
+# 安裝兩個以上套件
+
+#install.packages(c("googlesheets4","tidyverse"))
+
+```
+
+# 引入外部檔案
+
+```{r}
+
+library(readr)
+exDataPost80s <- read_csv("https://www.dropbox.com/s/rc6t40gsxduysz6/exDataPost80s.csv?dl=1")
+
+# 用選的（Import Dataset -> From Text (readr)）引入資料，再到History貼入程式碼（點該行 -> To Source）。
+# 用shift鍵可以一次選多行。
+
+```
+
+# create an object with values
+
+```{r}
+
+a <- 2
+a = 2 # = 與 <-同義
+
+```
+
+```{r}
+
+3 -> b
+
+```
+
+```{r}
+
+a
+a+b
+
+# a
+# a+b
+
+# ctrl+shift+c: comment/Uncomment
+
+```
+
+# R所接受的物件名稱
+
+```{r}
+
+my_108_total_credits <- 15
+
+# _108_total_credits <- 15
+# 108_total_credits <- 15
+# _my_108_total_credits <- 15
+
+my.108.total_credits <- 15
+
+# .108.total_credits <- 15 
+
+.my.108.total_credits <- 15    # 隱藏變數，因不希望使用者去改變。
+
+我的108學年總學分數 <- 15
+
+`我的108學年總學分數` <- 15 # 特殊名稱處理，`不是名稱的一部份
+`.108.total_credits` <- 15
+
+```
+
+# Atomic Vector
+
+以c(..., ..., ...)將「相同類型」值以「逗點」分隔而形成的向量。
+
+```{r}
+
+num1 <- 5
+num1 <- c(5)
+
+vNum1 <- c(2, 5)
+
+vNum2 <- c(2, num1)
+
+```
+
+```{r}
+
+vNum1 <- c(-1, 5)
+vNum2 <- c(2, 3)
+vNum3 <- c(vNum1, vNum2)
+
+vNum4 <- c(-1, 5, 2, 3)
+vNum5 <- c(c(-1, 5), c(2, 3))
+
+```
+
+## 練習
+
+```{r}
+
+vNum1 <- c(-1,5)
+vNum2 <- c(2,3)
+vNum4 <- c()    # 空向量
+
+
+# 請問以下操作後的變數(vNum3, vNum4)值為何？
+
+vNum3 <- c(vNum2, vNum1)
+vNum4 <- c(vNum4, vNum1)
+
+```
+
+```{r}
+
+# 若反覆操作，它們會有什麼變化？
+
+vNum4 <- c(vNum4, vNum1)    # 向量疊代（recursive vector concatenate）
+
+```
+
+## numeric
+
+```{r}
+
+num1<-5  # 非整數（double）
+num2<-5L  # 整數（integer）
+
+num1Vector<-c(5,6,7)
+num2Vector<-c(5L,6L,7L)
+
+```
+
+## character/string
+
+```{r}
+
+char1Vector<-c("你好","How are you?")
+
+```
+
+```{r}
+
+# 若要產生的值，內容有包含""，這時可改用成對的''。
+
+dialogue <- c('小明說："明天不用上課。"', '小花說："真的嗎？"')
+
+cat(dialogue, sep="\n")
+
+# 游標移到該函數，再按F1鍵，可查詢該函數的help。
+
+```
+
+## 練習
+
+```{r}
+
+library(googlesheets4)
+library(tidyverse)
+
+`出席狀況表單網址` <- "https://docs.google.com/spreadsheets/d/1oB-5hj1pO5g8FMpZbA7RgIG8NvCRx6WvLPwvleCEV4Q/edit#gid=987577191"    # 缺乏定義值
+
+ss <- as_sheets_id(`出席狀況表單網址`)
+
+homework_sheet <- sheets_read(ss,sheet=1)
+
+```
+
+# Logical
+
+```{r}
+
+logi1 <- c(T,TRUE,F,FALSE,FALSE)
+
+```
+
+```{r}
+
+# 邏輯值遇到數學運算時T會被當成1，而F會被當成0。
+
+# 加總向量內的所有元素值。
+sum(logi1)
+
+```
+
+# typeof()
+
+顯示atomic vector元素的基本認定型態，它代表電腦記憶體在儲存時真正看待的型態。
+
+```{r}
+
+num <- c(1.5, 2, 3)
+int <- c(1L, 3L, -2L)
+char <- c("1.5","2","3")
+logi <- c(T,T,F)
+
+typeof(num)
+typeof(int)
+typeof(char)
+typeof(logi)
+
+```
+
+# 重點
+
+```{r}
+
+# ctrl+shift+c: comment/Uncomment
+# 游標移到該函數，再按F1鍵，可查詢該函數的help。
+
+```
+
+
+
+
+
+
+
+
