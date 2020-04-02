@@ -1,0 +1,5 @@
+"0","save(commit, minScore, file = ""class0401.Rda"")
+"
+"2","Error in save(commit, minScore, file = ""class0401.Rda"") : 
+  objects ‘commit’, ‘minScore’ not found
+"
