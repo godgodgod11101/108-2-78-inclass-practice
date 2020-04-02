@@ -35,7 +35,7 @@ class(majors10_char)
 
 majors10_factor <- factor(majors10_char)
 
-typeof(majors10_factor)    # 以整數形式儲存類別資料
+typeof(majors10_factor)    # 以整數形式儲存類別資料（電腦儲存資料的型態）
 class(majors10_factor)
 
 levels(majors10_factor)    # 不同電腦default的順序可能不同
@@ -58,7 +58,7 @@ trueInteger+2    # 可以進行數值運算
 
 ```
 
-## 練習
+### 練習
 
 ```{r}
 
@@ -106,8 +106,15 @@ as.double(ptTime)
 
 ```{r}
 
-# 轉成同時區
+# List of Time Zones
+browseURL(url = "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
 
+```
+
+
+```{r}
+
+# 轉成同時區
 with_tz(tpeTime, tzone="UTC")
 with_tz(ptTime, tzone="UTC")
 
@@ -122,15 +129,21 @@ with_tz(ptTime, tzone="UTC")
 
 ymd_hms("2020-03-04T06:56:29Z", tz = "Asia/Taipei")
 ymd_hms("2020-03-04T06:56:29Z", tz = "Europe/Lisbon")
-
-# 若時間內有...T...Z，代表是UTC統一時間，不用在下時區。
-
 ymd_hms("2020-03-04T06:56:29Z")
-ymd_hms("2020-03-04T06:56:29Z")
+
+# 若時間資料內有...T...Z，表示為UTC，不用刻意下時區
+# （下了只會進一步轉成當地時間，多加一個步驟用with_tz()改較好）。
+
+tpeTime2 <- ymd_hms("2020-03-04T06:56:29Z")
+
+with_tz(
+  time = tpeTime2, 
+  tzone = "Asia/Taipei"
+)
 
 ```
 
-## 練習
+### 練習
 
 ```{r}
 
@@ -146,4 +159,17 @@ with_tz(
 )
 
 ```
+
+```{r}
+
+c(
+  ymd_hms("2020-03-04T06:43:50Z"), 
+  ymd_hms(
+    "2020-03-11 14:23:05", "2020-03-11 14:39:57",
+    tz = "Asia/Taipei"
+  )
+)
+
+```
+
 

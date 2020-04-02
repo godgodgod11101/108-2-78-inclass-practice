@@ -11,3 +11,7 @@
 "1"," ""2020-03-18 05:52:40 UTC"""
 "1","
 "
+"0","# 小心以下兩函數的input中一個是tz，一個是tzone"
+"0","#   ymd_hms(..., tz=""Asia/Taipei"")"
+"0","#   with_tz(..., tzone=""Asia/Taipei"")"
+"0",""
