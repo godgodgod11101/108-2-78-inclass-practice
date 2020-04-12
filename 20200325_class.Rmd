@@ -89,13 +89,13 @@ library(lubridate)
 ```{r}
 
 # 台北 2020-03-18 13:52:40
-tpeTime <- ymd_hms("2020-03-18 13:52:40", tz = "Asia/Taipei")
+tpeTime <- ymd_hms("2020-03-18 13:52:40", tz = "Asia/Taipei"); tpeTime
 
 typeof(tpeTime)    # 電腦儲存資料的形式
 class(tpeTime)    # 電腦呈現資料的形式
 
 # 葡萄牙 Mar.18, 2020, 05:52:40
-ptTime <- mdy_hms("Mar.18, 2020, 05:52:40", tz = "Europe/Lisbon")
+ptTime <- mdy_hms("Mar.18, 2020, 05:52:40", tz = "Europe/Lisbon"); ptTime
 
 
 # 兩地事實上是同時間
