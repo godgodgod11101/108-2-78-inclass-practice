@@ -101,7 +101,7 @@ tainanSportsMap[[1076]]
 # 有什麼名子可以選？
 names(listExample)
 
-# 查看原始資料結構
+# 查看原始資料結構（display the structure）
 str(listExample)
 
 str(listExample$semester)
@@ -276,13 +276,14 @@ taipeiNightMarkets[selectedMarkets] %>%
 
 ```
 
-# why don't use the [c("XXX")] method? 
+# Why don't use the [c("XXX")] method? 
 
 ```{r}
 
 str(listExample, max.level = 3)
 
 ```
+
 ```{r}
 
 get1 <- listExample[["semester"]]
@@ -306,7 +307,7 @@ str(get2, max.level = 1)
 # [[]]：拿出某個物件值。
 # listExample[["semester"]]將listExample裡的“semester”物件值拿出來
 
-# []: 留下某個物件值。
+# []：留下某個物件值。
 # listExample[c("semester")]「只留下」listExample裡的“semester”物件值
 
 ```

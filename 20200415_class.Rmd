@@ -1,0 +1,432 @@
+---
+title: "Untitled"
+author: "jacky wang"
+date: "2020/4/20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+
+opts_chunk$set(echo = TRUE, message = F, warning = F, eval=T)
+
+# windows檔名不要有"-"號
+
+```
+
+
+
+
+
+# 選取元素
+
+## 承上週
+
+```{r}
+
+listExample <- 
+  list(
+    student="小明",
+    semester=list(
+      `108-1`=list(
+        list(
+          name="個體經濟學",
+          teacher="Alice",
+          grade=85
+        )
+      ),
+      `108-2`=list(
+        list(
+          name="總體經濟學",
+          teacher="Mark",
+          grade=78
+        )
+      )
+    )
+  )
+
+str(listExample)
+
+```
+
+```{r}
+
+get1 <- listExample[["semester"]]    # 拿出來
+# 同
+listExample$semester
+
+get2 <- listExample["semester"]    # 只留下
+
+# [[]]：拿出某個物件值。
+# listExample[["semester"]]將listExample裡的“semester”物件值拿出來
+
+# []：留下某個物件值。
+# listExample["semester"]「只留下」listExample裡的“semester”物件值
+
+```
+
+```{r}
+
+str(get1)
+str(get2)
+
+```
+
+### practice
+
+```{r}
+
+# 請分別由get1、get2取出108-1學期個體經濟學教師姓名
+
+get1$`108-1`[[1]]$teacher
+
+get2$semester$`108-1`[[1]]$teacher
+
+```
+
+#### get2四步驟拆解
+
+```{r}
+
+str(get2)
+
+```
+
+```{r}
+
+get2$semester -> get2Layer1
+str(get2Layer1)
+
+```
+
+```{r}
+
+get2Layer1$`108-1` -> get2Layer2
+str(get2Layer2)
+
+```
+
+```{r}
+
+get2Layer2[[1]] -> get2Layer3
+str(get2Layer3)
+
+```
+
+```{r}
+
+get2Layer3[[2]] -> get2Layer4
+get2Layer4
+
+```
+
+## atomic vector也可以對元素值命名
+
+```{r}
+
+vector1 <- c(a=1, b=3, c=8)
+vector1[["a"]]
+vector1[c("a", "c")]
+# vector1$a    # $只適用於list
+
+list1 <- list(a=1, b=3, c=8)
+list1[["a"]]
+list1[c("a", "c")]
+list1$a
+
+```
+
+### practice
+
+```{r}
+
+today <- list(
+  list("台北市", c(highest_temp = 25), c(lowest_temp = 18)),
+  list("新北市", c(highest_temp = 24), c(lowest_temp = 15))
+)
+
+str(today)
+
+
+# 取出台北市最高溫
+
+today[[1]][[2]]    # 無法用highest_temp取出最高溫
+
+
+# 請修改today使其可用highest_temp取出最高溫
+
+today1 <- list(
+  list(city = "台北市", highest_temp = 25, lowest_temp = 18),
+  list(city = "新北市", highest_temp = 24, lowest_temp = 15)
+)
+str(today1)
+
+today1[[1]]$highest_temp
+
+```
+
+```{r}
+
+# 老師作法
+
+today2 <- list(
+  list(
+    city = "台北市", 
+    highest_temp = c(highest_temp = 25), 
+    lowest_temp = c(lowest_temp = 18)
+  ),
+  list(
+    city = "新北市", 
+    highest_temp = c(highest_temp = 24), 
+    lowest_temp = c(lowest_temp = 15)
+  )
+)
+
+today2[[1]]$highest_temp
+
+```
+
+
+
+# 新增／替換／刪除元素
+
+```{r}
+
+# 元素提取[.],[[.]],$.也可用來進行元素「值」的修改與新增
+
+# obj[.] <- value
+# obj[[.]] <- value
+# obj$. <- value
+
+
+a <- c("1", "b", "TRUE")
+a
+
+a[[2]] <- "c"    # 元素存在，替換
+a
+
+a[[4]] <- "7"    # 元素不存在，增加
+a
+
+a[c(5,6)] <- c("J", "K")
+a
+
+```
+
+## practice 1
+
+```{r}
+
+# 增加一個 Johnson ，使用 [[.]] <- 。
+
+a[[7]] <- "Johnson"
+a
+
+# 使用前一章的向量疊代（recursive vector concatenate）法，新增一個 Mary 。
+
+a <- c(a, "Mary")
+a
+
+```
+
+## practice 2
+
+```{r}
+
+library(lubridate)
+
+list1 <- 
+  list(
+    list(
+      name = "Jack",
+      birthday = ymd("1998-03-21"),
+      status = c(height=177, weight=80)
+    )
+  )
+
+str(list1)
+
+```
+
+```{r}
+
+# 更改日期
+
+list1[[1]]$birthday <- ymd("19930608")
+str(list1)
+
+```
+
+```{r}
+
+# 新增資料
+
+list1[[2]] <- 
+  list(
+      name = "Mary",
+      birthday = ymd("19930408")
+    )
+str(list1)
+
+```
+
+## practice 3
+
+```{r}
+
+# 由於[.]會保留母層結構，所以 <- 右側要使用和母層相同的型態設定：
+#   母層若為list，則需用list(...)方式增加。
+#   母層若為atomic vector，則用c(...)方式增加。
+
+str(list1)
+
+list1[[1]][["age"]] <- 25
+list1[[2]]["age"] <- list(23)
+
+str(list1)
+
+# 改變「一個」元素時，使用[[ ]]比較不會錯。
+
+```
+
+```{r}
+
+# 給Jack增加兩個元素
+
+list1[[1]][c("bloodType", "registered")] <- list("AB", T)
+str(list1)
+
+```
+
+## 刪除元素1
+
+```{r}
+
+# 刪除可以使用 [- c(數字位置)] 
+# 只能「一個」中括號（ [[.]] 不能接受負數值）
+# 只能用負數值，不能用元素名稱。
+
+print(a)
+
+a[-c(1, 3)]
+a[c(-2)]
+
+str(list1)
+
+# list1[[1]][[-"name"]]
+# list1[[1]][-c("name")]
+
+```
+
+### practice
+
+```{r}
+
+library(lubridate)
+
+list1 <- 
+  list(
+    list(
+      name = "Jack",
+      birthday = ymd("1998-03-21"),
+      status = c(height=177, weight=80)
+    ),
+    list(
+      name = "Mary",
+      birthday = ymd("1998-08-24"),
+      status = c(height=163, weight=45),
+      age = 21,
+      bloodType = "AB"
+    )
+  )
+str(list1)
+
+```
+
+```{r}
+
+# 刪除Jack的status
+
+list1[[1]][-3] -> list1[[1]]    # 小心！不要只打list1
+str(list1)
+
+```
+
+```{r}
+
+# 刪除Mary的status, blookType
+
+list1[[2]][-c(3, 5)] -> list1[[2]]
+str(list1)
+
+```
+
+## 刪除元素2
+
+```{r}
+
+# list元素要刪除時也可以用 [.] <-NULL 、 [[.]] <- NULL 
+
+str(list1)
+
+list1[[2]][c(1, 2)] <- NULL
+str(list1)
+
+# 用此方法不用再回存
+
+```
+
+### practice
+
+```{r}
+
+jsonlite::fromJSON("https://api.github.com/repos/tpemartin/108-2-56-inclass-practice/commits", simplifyDataFrame = F) -> githubCommit
+
+githubCommit[[3]][["commit"]][["committer"]]
+
+```
+
+```{r}
+
+# 刪掉email
+
+githubCommit[[3]][["commit"]][["committer"]][-c(2)] -> 
+  githubCommit[[3]][["commit"]][["committer"]]
+
+githubCommit[[3]][["commit"]][["committer"]]
+# 當list很多層，此方式太麻煩了
+
+
+githubCommit[[1]][["commit"]][["committer"]]$email <- NULL
+
+githubCommit[[1]][["commit"]][["committer"]]
+# 簡潔有力
+
+```
+
+### homework
+
+```{r}
+
+library(jsonlite)
+
+fromJSON("https://data.ntpc.gov.tw/od/data/api/54DDDC93-589C-4858-9C95-18B2046CC1FC?$format=json", simplifyDataFrame = F) -> newTaipeiYouBike
+
+```
+
+```{r}
+
+# 請自行對它做內容更動練習
+
+```
+
+
+
+
+
+
+
+
+
+
