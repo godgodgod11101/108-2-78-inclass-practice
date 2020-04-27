@@ -1,0 +1,7 @@
+"0","#example$allowance >= ""1001-2000""    # not ordered factor
+class(example$allowance)
+"
+"1","[1]"
+"1"," ""factor"""
+"1","
+"

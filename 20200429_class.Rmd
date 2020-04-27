@@ -1,0 +1,319 @@
+---
+title: "Untitled"
+author: "jacky wang"
+date: "2020/4/27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+
+opts_chunk$set(echo = TRUE, message = F, warning = T, eval=T)
+
+# windows檔名不要有"-"號
+
+```
+
+
+
+
+
+# On numeric class
+
+```{r}
+
+a <- c(2, 3, 5)
+b <- c(4,-1, 3)
+
+```
+
+```{r}
+
+# elementwise operation
+
+a+b
+a-b
+a*b
+a/b
+
+```
+
+```{r}
+
+a %% b    # 餘數
+
+a ** b
+a^b    # 次方
+
+```
+
+## practice
+
+```{r}
+
+# 奇、偶判斷
+
+sequenceNums <- c(11, 6, 8, 11, 12, 11, 3, 7, 10, 8)
+
+sequenceNums %% 2    # 餘數為1則是奇數，0則是偶數
+
+```
+
+## recycle (Python: broadcast)
+
+```{r}
+
+5 * c(1, 3, 4) + 7
+# 等於
+c(5,5,5) * c(1,3,4) + c(7,7,7)
+
+```
+
+```{r}
+
+# 狀況一: 堆疊一定倍數剛好一樣長
+
+c(2,3)/c(-2,-13,10,22)
+# 等於
+c(2,3,2,3)/c(-2,-13,10,22)
+
+```
+
+```{r}
+
+# 狀況二: 倍數堆疊一定會超過，只好截斷
+
+c(2,3)/c(-2,-13,10)
+# 等於
+c(2,3,2)/c(-2,-13,10)
+
+```
+
+```{r}
+
+#rRecycle不只用在數值class
+
+paste0(
+  c("我叫"), c("小明","小美")
+)
+# 等於
+paste0(
+  c("我叫","我叫"), c("小明","小美")
+)
+
+```
+
+```{r}
+
+paste0(
+  c("他叫","我叫"), c("小明","小美","大雄")
+)
+
+```
+
+# Relational Operators
+
+```{r}
+
+example <- list(
+  name=c("小明","小花","小新","美美"),
+  height=c(175,166,170,160),
+  weight=c(77,NA,60,43),
+  birthday=lubridate::ymd(c("1998-03-11","1999-12-22","1995-08-22","2001-10-10")),
+  hobby=c("美食 旅遊","旅遊 時尚","3C 美食","音樂 旅遊"),
+  residence=c("Taipei","New Taipei","Taichung","Kaohsiung"),
+  allowance=factor(c("0-1000","1001-2000","2000+","1001-2000")),
+  bloodType=c("A","B","B","O")
+)
+
+```
+
+```{r}
+
+str(example[c("name", "height")])
+
+```
+
+```{r}
+
+# example裡誰的身高大於等於170
+
+example$name[c(T, F, T, F)]    # 爛方法
+
+example$height >= 170 -> pickAbove170
+example$name[pickAbove170]
+
+
+```
+
+## practice1
+
+```{r}
+
+source("https://www.dropbox.com/s/qsrw069n94k61lj/transcript100to103_list.R?dl=1")
+
+```
+
+```{r}
+
+str(transcript100to103)
+
+```
+
+```{r}
+
+# 各學屆二年級人數
+
+table(transcript100to103$學屆)    # 分類數次數
+
+```
+
+```{r}
+
+# 選成績大於85分
+
+transcript100to103$成績 > 85 -> pickAbove85
+table(transcript100to103$學屆[pickAbove85])
+
+```
+
+## practice2
+
+```{r}
+
+example$birthday
+class(example$birthday)
+typeof(example$birthday)
+
+```
+
+```{r}
+
+# example裡誰1998年（含）以後出生
+
+print(example[c("name", "birthday")])
+
+example$birthday >= lubridate::ymd("19980101") -> 
+  pickAfter98
+
+example$name[pickAfter98]
+
+```
+
+## practice3
+
+```{r}
+
+source("https://www.dropbox.com/s/16h6ggua6qtydci/exchangeRate.R?dl=1")
+
+```
+
+```{r}
+
+str(exchangeRate)
+
+```
+
+
+```{r}
+
+# 選出1998年1月（含）以後的匯率資料
+
+exchangeRate$期間 >= lubridate::ymd("19980101") -> 
+  pickAfter1998
+
+list(
+  `期間` = exchangeRate$期間[pickAfter1998], 
+  `幣別` = exchangeRate$幣別[pickAfter1998], 
+  `匯率` = exchangeRate$匯率[pickAfter1998]
+) -> 
+  exchangeRate_after1998
+
+```
+
+## practice4
+
+```{r}
+
+print(example[c("name", "allowance")])
+
+```
+
+```{r}
+
+# example裡誰零用錢大於1000
+
+#example$allowance >= "1001-2000"    # not ordered factor
+class(example$allowance)
+
+```
+
+```{r}
+
+example$allowance <- 
+  ordered(
+    example$allowance
+  )
+
+class(example$allowance)
+
+example$allowance >= "1001-2000" -> 
+  pickOver1000
+
+example$name[pickOver1000]
+
+```
+
+```{r}
+
+# 也可以在設factor時直接設好ordered
+
+factor(
+  c("0-1000", "1001-2000", "2000+", "1001-2000"), 
+  levels = c("0-1000", "1001-2000", "2000+"), 
+  ordered = T    # 設定為可排序的factor
+)
+
+```
+
+## homework
+
+```{r}
+
+jsonlite::fromJSON("https://www.dropbox.com/s/3uijub7xheib405/list_victimAges_female.json?dl=1", simplifyDataFrame = F) -> list_victimAges_female
+
+```
+
+```{r}
+
+str(list_victimAges_female)
+View(list_victimAges_female$年齡層)
+
+```
+
+```{r}
+
+# 選出「30_39歲以上受害者」的數目
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
