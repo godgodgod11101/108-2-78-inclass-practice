@@ -114,6 +114,8 @@ paste0(
 
 # Relational Operators
 
+## 比較
+
 ```{r}
 
 example <- list(
@@ -147,7 +149,7 @@ example$name[pickAbove170]
 
 ```
 
-## practice1
+### practice1
 
 ```{r}
 
@@ -178,7 +180,7 @@ table(transcript100to103$學屆[pickAbove85])
 
 ```
 
-## practice2
+### practice2
 
 ```{r}
 
@@ -201,7 +203,7 @@ example$name[pickAfter98]
 
 ```
 
-## practice3
+### practice3
 
 ```{r}
 
@@ -232,7 +234,7 @@ list(
 
 ```
 
-## practice4
+### practice4
 
 ```{r}
 
@@ -277,7 +279,7 @@ factor(
 
 ```
 
-## homework
+### homework
 
 ```{r}
 
@@ -288,7 +290,7 @@ jsonlite::fromJSON("https://www.dropbox.com/s/3uijub7xheib405/list_victimAges_fe
 ```{r}
 
 str(list_victimAges_female)
-View(list_victimAges_female$年齡層)
+# View(list_victimAges_female$年齡層)
 
 ```
 
@@ -298,14 +300,92 @@ View(list_victimAges_female$年齡層)
 
 ```
 
+## 相等、屬於
+
+```{r}
+
+print(example[c("name", "bloodType")])
+
+# example裡誰血型B型
+
+pick_bloodB <- example$bloodType == "B"
+example$name[pick_bloodB]
+
+```
+
+```{r}
+
+sequenceNums <- c(11, 6, 8, 11, 12, 11, 3, 7, 10, 8)
+
+# 取出偶數
+
+pick_even <- (sequenceNums %% 2) == 0    # 確保()內先執行
+sequenceNums[pick_even]
+
+```
+
+```{r}
+
+x <- c(1,5,8)
+y <- c(5,8)
+
+x %in% y    # x裡的每個元素值是不是屬於y集合
+
+```
+
+```{r}
+
+# example裡誰來自大台北
+
+example[c("name", "residence")]
+
+pick_fromTaipeiMetro <- example$residence %in% c("Taipei", "New Taipei")
+example$name[pick_fromTaipeiMetro]
+
+```
+
+```{r}
+
+source("https://www.dropbox.com/s/qsrw069n94k61lj/transcript100to103_list.R?dl=1")
+
+str(transcript100to103)
+
+```
+
+```{r}
+
+# 創造可選出來自法商學院的True or False向量
+
+levels(factor(transcript100to103$學院))    # 看資料有哪幾種學院
+unique(transcript100to103$學院)    # 看資料有哪幾種學院
+
+pick_lawBusiness <- transcript100to103$學院 %in% c("法學院", "商學院")
+
+```
+
+## Negation
+
+```{r}
+
+# 在 TorF向量 前加上 ! 會成為否定句的 TorF向量
+
+pick_notFromTaipeiMetro <- !pick_fromTaipeiMetro
+pick_notFromTaipeiMetro <- !(example$residence %in% c("Taipei", "New Taipei"))
+
+pick_notFromTaipeiMetro
+
+example$name[pick_fromTaipeiMetro]
+example$name[pick_notFromTaipeiMetro]
+
+```
+
+## 資料狀態
+
+```{r}
 
 
 
-
-
-
-
-
+```
 
 
 
