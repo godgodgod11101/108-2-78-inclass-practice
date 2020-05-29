@@ -26,6 +26,8 @@
 "
 "0","example$birthday >= lubridate::ymd(""19980101"") -> "
 "0","  pickAfter98"
+"0","# typeof(example$birthday)"
+"0","#   時間資料原始型態為double，可以比大小"
 "0",""
 "0","example$name[pickAfter98]"
 "1","[1]"

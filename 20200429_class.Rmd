@@ -112,6 +112,10 @@ paste0(
 
 ```
 
+
+
+
+
 # Relational Operators
 
 ## 比較
@@ -169,6 +173,9 @@ str(transcript100to103)
 
 table(transcript100to103$學屆)    # 分類數次數
 
+
+# contingency table: 列聯表
+
 ```
 
 ```{r}
@@ -198,6 +205,8 @@ print(example[c("name", "birthday")])
 
 example$birthday >= lubridate::ymd("19980101") -> 
   pickAfter98
+# typeof(example$birthday)
+#   時間資料原始型態為double，可以比大小
 
 example$name[pickAfter98]
 
@@ -259,6 +268,7 @@ example$allowance <-
   )
 
 class(example$allowance)
+levels(example$allowance)
 
 example$allowance >= "1001-2000" -> 
   pickOver1000
@@ -298,9 +308,50 @@ str(list_victimAges_female)
 
 # 選出「30_39歲以上受害者」的數目
 
+library(dplyr)
+
+# 設level向量
+list_victimAges_female$年齡層 %>% 
+  as.factor() %>% 
+  levels() -> 
+  levelOfAge
+
+# 調成正確順序
+levelOfAge_mod <- 
+  levelOfAge[c(12, 13, 1, 8, 2:7, 9:11)]
+
+# 更改 年齡層 為ordered
+list_victimAges_female$年齡層 %>% 
+  factor(
+    levels = levelOfAge_mod, 
+    ordered = T
+  ) -> 
+  list_victimAges_female$年齡層_ordered
+
+list_victimAges_female$年齡層_ordered >= "30_39歲" -> 
+  choose_above3039
+
+list_victimAges_female$數目[choose_above3039] %>% 
+  sum(na.rm = T)
+
 ```
 
 ## 相等、屬於
+
+```{r}
+
+example <- list(
+  name=c("小明","小花","小新","美美"),
+  height=c(175,166,170,160),
+  weight=c(77,NA,60,43),
+  birthday=lubridate::ymd(c("1998-03-11","1999-12-22","1995-08-22","2001-10-10")),
+  hobby=c("美食 旅遊","旅遊 時尚","3C 美食","音樂 旅遊"),
+  residence=c("Taipei","New Taipei","Taichung","Kaohsiung"),
+  allowance=factor(c("0-1000","1001-2000","2000+","1001-2000")),
+  bloodType=c("A","B","B","O")
+)
+
+```
 
 ```{r}
 
@@ -383,11 +434,147 @@ example$name[pick_notFromTaipeiMetro]
 
 ```{r}
 
+x2 <- c(1, NA, 10)
+y2 <- c(-1, NA, 20)
 
+x3 <- c(NA, "小花")
+y3 <- c(NA, "小華")
 
 ```
 
+```{r}
 
+is.na(x2)
+
+```
+
+```{r}
+
+# NaN: not a number (出現在沒有定義的數學運算)
+
+log(-10)
+
+```
+
+### practice1
+
+```{r}
+
+# example裡誰沒有體重資料
+
+print(example[c("name","weight")])
+
+choose_na <- is.na(example$weight)
+example$name[choose_na]
+
+```
+
+### practice2
+
+```{r}
+
+jsonlite::fromJSON("https://www.dropbox.com/s/3uijub7xheib405/list_victimAges_female.json?dl=1", simplifyDataFrame = F) -> list_victimAges_female
+
+```
+
+```{r}
+
+head(list_victimAges_female$數目)
+
+# 創立可選出缺失資料的T/F向量, 並計算有多少筆缺失
+
+is.na(list_victimAges_female$數目) -> pick_na
+sum(pick_na)    # True=1, False=0
+
+```
+
+## 字元偵測
+
+```{r}
+
+example <- list(
+  name=c("小明","小花","小新","美美"),
+  height=c(175,166,170,160),
+  weight=c(77,NA,60,43),
+  birthday=lubridate::ymd(c("1998-03-11","1999-12-22","1995-08-22","2001-10-10")),
+  hobby=c("美食 旅遊","旅遊 時尚","3C 美食","音樂 旅遊"),
+  residence=c("Taipei","New Taipei","Taichung","Kaohsiung"),
+  allowance=factor(c("0-1000","1001-2000","2000+","1001-2000")),
+  bloodType=c("A","B","B","O")
+)
+
+```
+
+```{r}
+
+# example裡誰喜歡美食
+
+print(example[c("name", "hobby")])
+
+stringr::str_detect(example$hobby, pattern = "美食") -> pick_food
+example$name[pick_food]
+# str_detect(): 偵測字串內容內有無關鍵字（pattern）
+
+```
+
+### practice1
+
+```{r}
+
+jsonlite::fromJSON("https://data.ntpc.gov.tw/api/datasets/EDC3AD26-8AE7-4916-A00B-BC6048D19BF8/json") ->
+  garbageRoutes
+
+```
+
+```{r}
+
+typeof(garbageRoutes)    # 本質為list
+class(garbageRoutes)    # class為data.frame表示它有比list多了許多操作空間
+
+```
+
+```{r}
+
+# 由linename元素判斷垃圾車有幾條路線
+
+# 資料損毀
+
+```
+
+## 閱讀函數說明
+
+```{r}
+
+library(stringr)
+?str_detect
+
+```
+
+```{r}
+
+# 看不懂說明，貼上範例試試
+
+fruit <- c("apple", "banana", "pear", "pinapple")
+
+str_detect(fruit, "a")
+str_detect(fruit, "^a")    # 字元規律描述（regular expression）："^a"---以"a"開頭
+str_detect(fruit, "a$")    # "a$"---"a"結尾 
+
+str_detect(fruit, "a$", negate = T)
+!str_detect(fruit, "a$")
+
+str_detect(fruit, "b")
+str_detect(fruit, "[aeiou]")
+
+```
+
+# homework
+
+```{r}
+
+CDC_chatbox <- readr::read_csv("http://od.cdc.gov.tw/pr/CDC_chatbox.csv")
+
+```
 
 
 
