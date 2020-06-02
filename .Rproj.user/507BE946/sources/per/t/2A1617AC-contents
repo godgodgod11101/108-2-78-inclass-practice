@@ -69,6 +69,8 @@ Sys.getlocale("LC_COLLATE")
 
 ```
 
+##  levels重新排列
+
 ```{r}
 
 jsonlite::fromJSON("https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json") -> covid19
@@ -115,7 +117,7 @@ levels(factor(covid19$年齡層))
 
 ```
 
-## practice1
+### practice1
 
 ```{r}
 
@@ -161,7 +163,7 @@ levels(covid19$縣市)
 
 ```
 
-## practice2
+### practice2
 
 依數據重排類別小技巧：善用named vector －＞ sort()
 
@@ -202,6 +204,246 @@ levels(covid19$年齡層_order1)
 levels(covid19$年齡層_order2)
 
 ```
+
+## levels改名
+
+```{r}
+
+factor1 <- factor(
+  c("A","A","C","A","D","F","D","D")
+)
+factor1
+
+levels(factor1) <- c("優","佳","尚可","普")    # 改level名
+factor1
+# 類別資料改名時，直接從level改即可，不用一個個取出來改
+
+```
+
+```{r}
+
+# 也可以只改其中幾個
+
+levels(factor1)[[1]] <- "Excellent"
+factor1
+
+levels(factor1)[c(3, 4)] <- c("C", "D")
+factor1
+
+```
+
+## levels整併
+
+```{r}
+
+factor_city <- 
+  factor(c("新北市","台北市","台中市","彰化市","基隆市","苗栗縣","苗栗縣"))
+factor_city
+
+# 改成只有北、中兩類
+
+levels(factor_city) <- c("中部", "北部", "中部", "北部", "北部", "中部")
+factor_city    # 只剩兩個level
+
+```
+
+```{r}
+
+factor1 <- factor(c("0-4歲","5-9歲","10歲以上","0-4歲","5-9歲","5-9歲","10歲以上"))
+factor1
+
+# 改成10歲一區間
+
+levels(factor1) <- c("0-9歲","10歲以上","0-9歲")
+factor1
+
+```
+
+### practice1
+
+```{r}
+
+jsonlite::fromJSON("https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json") -> covid19
+
+```
+
+```{r}
+
+# 由 covid19$縣市 建立一個地區變數，值為北部、中部、南部、東部。
+
+covid19$地區 <- factor(covid19$縣市)
+levels(covid19$地區)
+
+```
+
+```{r}
+
+# 建立regex
+north_regex <- 
+  "宜蘭縣|基隆市|[台臺]北市|新北市|桃園市|新竹[市縣]"
+
+middle_regex <- 
+  "苗栗縣|[台臺]中市|彰化縣|南投縣|雲林縣"
+
+south_regex <- 
+  "嘉義[市縣]|[台臺]南[縣市]|高雄市|屏東縣|澎湖縣"
+
+east_regex <- 
+  "花蓮縣|台東縣"
+
+# 用str_replace()代換
+levels(covid19$地區) <- 
+  str_replace(
+    string = levels(covid19$地區), 
+    pattern = north_regex, 
+    replacement = "北部"
+  )
+
+levels(covid19$地區) <- 
+  str_replace(
+    string = levels(covid19$地區), 
+    pattern = middle_regex, 
+    replacement = "中部"
+  )
+
+levels(covid19$地區) <- 
+  str_replace(
+    string = levels(covid19$地區), 
+    pattern = south_regex, 
+    replacement = "南部"
+  )
+
+levels(covid19$地區) <- 
+  str_replace(
+    string = levels(covid19$地區), 
+    pattern = east_regex, 
+    replacement = "東部"
+  )
+
+levels(covid19$地區)
+
+```
+
+### practice2
+
+```{r}
+
+# 將 covid19$年齡層 由5歲間距改成10歲間距，使改完後的levels為4 < 5-14 < ... < 55-64 < 65+
+
+covid19$`年齡層1` <- 
+  factor(covid19$年齡層)
+
+# 先將 年齡層 形成ordered factor
+levels(covid19$`年齡層1`) -> name1
+
+str_extract(
+  name1, "^[0-9]+"
+) -> 
+  value1
+
+as.integer(value1) -> value1
+
+names(value1) <- name1
+value1
+
+sort(value1) -> value1
+
+covid19$`年齡層1` <- 
+  factor(
+    covid19$`年齡層1`, 
+    levels = names(value1), 
+    ordered = T
+  )
+
+```
+
+```{r}
+
+levels(covid19$"年齡層1")
+
+# 新level
+start_age <- seq(5, 55, by = 10)
+
+end_age <- seq(14, 64, by = 10)
+
+rep(
+  paste0(start_age, "-", end_age), 
+  each = 2    # 每個元素重複兩次
+) -> 
+  ageLevel_1
+
+ageLevel_new <- c("4", ageLevel_1, "65+", "65+")
+
+levels(covid19$"年齡層1") <- ageLevel_new
+
+covid19$`年齡層1`
+
+```
+
+## levels擴充
+
+
+
+```{r}
+
+factor2 <- 
+  factor(c("好","好","普通","普通", "好"))
+
+levels(factor2)
+
+factor2[[6]] <- "差"
+factor2    # 元素6變NA
+
+```
+
+```{r}
+
+# 先擴大levels, 再加新資料
+
+levels(factor2) <- c(levels(factor2), "差")
+levels(factor2)
+
+factor2[[6]] <- "差"
+factor2
+
+
+
+levels(factor2)[[4]] <- "尚可"
+factor2[[7]] <- "尚可"
+factor2
+
+```
+
+```{r}
+
+# 無法用c(...)把兩個factor vector串接在一起
+
+# non factor
+char1 <- c("小明", "小美")
+char2 <- c("大雄", "技安")
+c(char1, char2)
+
+# factor
+factor11 <- factor(c("好", "壞", "壞"))
+factor22 <- factor(c("壞", "好", "好"))
+c(factor11, factor22)    # factor被當成integer後才串接在一起
+
+```
+
+```{r}
+
+# 正確接法
+
+factor11[4:6] <- factor22
+factor11
+
+# 或
+
+forcats::fct_c(factor11, factor22)
+
+```
+
+# Homework
 
 
 
