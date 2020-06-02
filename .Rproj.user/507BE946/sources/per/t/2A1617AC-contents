@@ -1,0 +1,211 @@
+---
+title: "Untitled"
+author: "jacky wang"
+date: "2020/6/2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+
+opts_chunk$set(echo = TRUE, message = F, warning = T, eval=T)
+
+# windows檔名不要有"-"號
+
+```
+
+```{r package, include=FALSE}
+
+library(readr)
+library(lubridate)
+library(stringr)
+library(glue)
+
+```
+
+
+
+
+
+# On factor class
+
+內定levels沒啥意義
+
+```{r}
+
+char1 <- c("Wild","Apple","Donald","May","Avocada") 
+factor1 <- factor(char1)
+levels(factor1)
+
+char2 <- c("蔡英文","習近平","Donald Trump","蔡頭") 
+factor2 <- factor(char2)
+levels(factor2)
+
+```
+
+```{r}
+
+# sort()：排序（電腦自動排）
+
+sort(
+  str_sub(char2,1,1)    # str_sub()：取出字元
+)
+
+sort(
+  str_sub(char2,2,2)
+)
+
+```
+
+```{r}
+
+# 查詢collating sequence設定
+
+Sys.getlocale("LC_COLLATE")
+
+# 由於不同電腦、不同作業系統的collatingsequence不同，
+# 如果levels順序在你的分析是重要的，一定要在設定factor時自行設定好。
+
+```
+
+```{r}
+
+jsonlite::fromJSON("https://od.cdc.gov.tw/eic/Day_Confirmation_Age_County_Gender_19CoV.json") -> covid19
+
+```
+
+```{r}
+
+# 不可排序類別：性別、縣市、是否境外移入
+
+covid19$縣市 <- 
+  factor(covid19$縣市)
+
+covid19$性別 <-
+  factor(covid19$性別)
+
+covid19$是否為境外移入 <-
+  factor(
+    covid19$是否為境外移入
+  )
+
+```
+
+```{r}
+
+# 可排序類別資料：年齡層
+
+levels(
+  as.factor(covid19$年齡層)
+) -> 
+  age_level
+
+age_level[c(7, 10, 1:6, 8, 9, 11, 12, 13:15)] -> 
+  age_level_r
+
+covid19$年齡層_order1 <- factor(
+  covid19$年齡層, 
+  levels = age_level_r, 
+  ordered = T
+)
+
+levels(covid19$年齡層_order1)
+levels(factor(covid19$年齡層))
+
+```
+
+## practice1
+
+```{r}
+
+jsonlite::fromJSON(
+  "https://www.dropbox.com/s/jckqryeh5zeat5w/regionPopulation.json?dl=1"
+) -> population
+unlist(population) -> population
+
+```
+
+```{r}
+
+# 依「人口多寡」排序縣市
+
+print(population)
+class(population)    # 有取名稱的integer vector
+names(population)
+
+levels(covid19$縣市)    # 為字串vector
+population[levels(covid19$縣市)] -> 
+  population
+
+```
+
+```{r}
+
+sort(
+  population, 
+  decreasing = T
+) -> 
+  population
+
+name_newLevel <- 
+  names(population)
+
+covid19$縣市 <- factor(
+  covid19$縣市, 
+  levels = name_newLevel, 
+  ordered = T
+)
+
+levels(covid19$縣市)
+
+```
+
+## practice2
+
+依數據重排類別小技巧：善用named vector －＞ sort()
+
+```{r}
+
+# 年齡排序
+
+levels(factor(covid19$年齡層)) -> 
+  vector_name
+
+str_extract(
+  vector_name, 
+  pattern = "^[:digit:]+"
+) -> 
+  vector_value
+
+as.integer(vector_value) -> 
+  vector_value
+
+# 創造named vector
+names(vector_value)    # 觀察元素名稱
+names(vector_value) <- vector_name    # 為元素取名
+
+# sort()排序
+sort(
+  vector_value
+) -> 
+  vector_value
+
+covid19$年齡層_order2 <- 
+  factor(
+    covid19$年齡層, 
+    levels = names(vector_value), 
+    ordered = T
+  )
+
+levels(covid19$年齡層_order1)
+levels(covid19$年齡層_order2)
+
+```
+
+
+
+
+
+
+

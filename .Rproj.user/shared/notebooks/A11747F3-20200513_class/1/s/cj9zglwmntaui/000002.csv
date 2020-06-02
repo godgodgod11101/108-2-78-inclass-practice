@@ -1,0 +1,32 @@
+"0",""
+"0","jsonlite::fromJSON("
+"0","  ""https://www.dropbox.com/s/jckqryeh5zeat5w/regionPopulation.json?dl=1"""
+"0",") -> population"
+"2","Warning messages:
+"
+"2","1: "
+"2","In grepl(""|||"", what, fixed = TRUE) :"
+"2","
+ "
+"2"," input string 1 is invalid in this locale
+"
+"2","2: "
+"2","In grepl(""|||"", what, fixed = TRUE) :"
+"2","
+ "
+"2"," input string 1 is invalid in this locale
+"
+"2","3: "
+"2","In grepl(""|||"", what, fixed = TRUE) :"
+"2","
+ "
+"2"," input string 1 is invalid in this locale
+"
+"2","4: "
+"2","In grepl(""|||"", what, fixed = TRUE) :"
+"2","
+ "
+"2"," input string 1 is invalid in this locale
+"
+"0","unlist(population) -> population"
+"0",""
