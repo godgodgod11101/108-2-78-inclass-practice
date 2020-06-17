@@ -142,12 +142,218 @@ map(chr, ~ str_extract_all(.x, "[ad]"))
 
 ```
 
+## homework
 
 
 
 
+# Pipe
+
+```{r}
+
+threeHeights <- c(Gary=178, John=182, Cam=175)
+
+```
+
+```{r}
+
+# 找出身高最高的人
+
+# 法1
+sort(threeHeights, decreasing = T) -> 
+  sorted_heights1
+
+names(sorted_heights1) -> sorted_heights2
+
+sorted_heights2[[1]]
+# 缺點：太多瑣碎物件
+
+# 法2
+names(sort(threeHeights, decreasing = T))[[1]]
+# 缺點：難懂
+
+```
+
+```{r}
+
+library(magrittr)    # pipe operation
+
+```
+
+```{r}
+
+threeHeights %>% 
+  sort(decreasing = T) %>% 
+  names() %>% 
+  .[[1]]
+# 用.代表前面物件
+
+```
+
+## practice1
+
+```{r}
+
+# 由cities創出每個元素對應的地區（regions）
+
+cities <- factor(c("台北","花蓮","台東","台中"))
+levels(cities)
+
+```
+
+```{r}
+
+regions <- cities
+
+regions %>% 
+  levels(.) %>% 
+  str_replace(., pattern = "台北", "北部") %>% 
+  str_replace(., pattern = "花蓮|台東", "東部") %>% 
+  str_replace(., pattern = "台中", "中部") ->
+  levels(regions)
+
+regions
+  
+
+```
 
 
+## 元素粹取
+
+```{r}
+
+num <- c(2,97,22,15,7)
+
+# 選出大於50的數字
+
+# 原始作法
+(num > 50) -> pick_big
+num[pick_big]
+
+# pipe expression
+(num > 50) %>% 
+  num[.]
+
+```
+
+## 執行順序
+
+```{r}
+
+threeHeights %>%
+  sort(., decreasing=T) %>%
+  names(.) %>%
+  .[[1]] -> 
+  heightestPerson
+# 等於
+heightestPerson <- 
+  threeHeights %>%
+  sort(., decreasing=T) %>%
+  names(.) %>%
+  .[[1]]
+
+# R會先把pipe走完最後才去做值assign給物件的動作
+
+```
+
+## 省略原則
+
+```{r}
+
+cities %>% 
+  levels(.) %>% 
+  str_replace(., pattern = "台北", "北部") %>% 
+  str_replace(., pattern = "花蓮|台東", "東部") %>% 
+  str_replace(., pattern = "台中", "中部")
+# 等於
+cities %>% 
+  levels() %>% 
+  str_replace(pattern = "台北", "北部") %>% 
+  str_replace(pattern = "花蓮|台東", "東部") %>% 
+  str_replace(pattern = "台中", "中部")
+
+```
+
+```{r}
+
+# 要小心 %>% 是將左邊output放到右邊函數，右邊函數指的是最外圍的函數
+
+population <- c(`cityA`=500,`cityB`=1500, `cityC`=399)
+cities <- c("cityA","cityA","cityB","cityB","cityC")
+
+# 原始作法
+names(sort(population)) -> setLevels
+factor(cities, levels = setLevels)
+
+# pipe expression (wrong)
+# population %>% 
+#   names(sort(.)) %>% 
+#   factor(cities, levels = .)
+
+
+# pipe expression
+population %>% 
+  sort(.) %>% 
+  names(.) %>% 
+  factor(cities, levels = .)
+
+```
+
+```{r}
+
+# pipe expression (wrong)
+population %>%
+  {names(sort(.))} %>%
+  factor(cities, levels = .)
+
+# 直觀想法：若遇到錯誤訊息，用{錯誤的地方}
+
+```
+
+## 串接非單純函數程序
+
+```{r}
+
+dataList <- list(
+  num=c(2,97,22,15,7),
+  chr=c("2","97","22","15","7")
+)
+
+```
+
+```{r}
+
+# 找出dataList中元素class為numeric裡那些大於50的數字
+
+# 原始作法
+purrr::map(dataList, ~is.numeric(.x)) -> pick_numeric
+purrr::map(dataList, is.numeric)    # 省略寫法
+
+unlist(pick_numeric) -> pick_numericV    # unlist()：分解list成為named vector
+
+dataList[pick_numericV]$num > 50 -> pick_big    # list無法比大小
+
+dataList[pick_numericV]$num[pick_big]
+
+```
+
+```{r}
+
+# pipe expression
+
+dataList %>% 
+  map(., ~ is.numeric(.x)) %>% 
+  unlist(.) %>% 
+  dataList[.] %>% 
+  {(.[[1]] > 50)} -> pick_big
+# pipe的下一段並不是單純的函數的話，可以用{}把此段內容括起來
+
+dataList %>% 
+  map(., ~ is.numeric(.x)) %>% 
+  unlist(.) %>% 
+  {dataList[.][[1]][pick_big]}
+
+```
 
 
 

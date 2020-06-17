@@ -1,0 +1,20 @@
+"0","# pipe expression (wrong)
+population %>%
+  {names(sort(.))} %>%
+  factor(cities, levels = .)
+"
+"1","[1]"
+"1"," cityA"
+"1"," cityA"
+"1"," cityB"
+"1"," cityB"
+"1"," cityC"
+"1","
+"
+"1",""
+"1","Levels: "
+"1",""
+"1","cityC cityA cityB"
+"1",""
+"1","
+"

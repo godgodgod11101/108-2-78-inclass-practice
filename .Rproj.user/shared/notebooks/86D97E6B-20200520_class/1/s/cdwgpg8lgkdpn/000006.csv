@@ -1,0 +1,7 @@
+"0",""
+"0","threeHeights %>%"
+"0","  sort(., decreasing=T) %>%"
+"0","  names(.) %>%"
+"0","  .[[1]] -> "
+"0","  heightestPerson"
+"0",""
