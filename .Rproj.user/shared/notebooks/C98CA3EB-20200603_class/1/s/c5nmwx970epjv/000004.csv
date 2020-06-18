@@ -1,0 +1,22 @@
+"0",""
+"0","class(demand_return)    # 函數的class"
+"1","[1]"
+"1"," ""function"""
+"1","
+"
+"0","formals(demand_return)    # 函數input要求"
+"1","$p
+"
+"1","
+"
+"1","
+"
+"0","body(demand_return)    # 函數主體"
+"1","{
+"
+"1","    q_d <- 10 - 5 * p
+"
+"1","    return(q_d)
+"
+"1","}
+"
