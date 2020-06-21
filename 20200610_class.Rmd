@@ -386,14 +386,13 @@ system.time(askSillyWeatherSlow("台北市"))
 system.time(askSillyWeatherFast("台北市"))    # 有資料時，elapse time = 0
 
 detach(name = ".R_Cache")    # 清除cache
+#SOAR::Remove(weather_next36hours)    #  清除.R_Cache 裡的東西
 
 ```
 
 #### 清除library函數
 
 ```{r}
-
-
 
 clear_otherPackage <- function(){
   
@@ -414,8 +413,120 @@ clear_otherPackage <- function(){
 
 ```
 
+## if else
+
+if(條件){
+  Body for 條件為真
+} else{
+  Body for 條件為假
+}
+
+```{r}
+
+n = 55
+
+if(
+  (n %% 2) == 1
+){
+  fValue <- -(n+1)/2
+} else{
+  fValue <- n/2
+}
 
 
+as.logical(n %% 2)    # 0轉成False，1轉成True
+
+# as.logical(1)
+# as.logical(0)
+
+```
+
+```{r}
+
+# 寫成函數
+
+jackFun <- function(n){
+  
+  if(
+    (n %% 2) == 1
+  ){
+    fValue <- -(n+1)/2
+  } else{
+    fValue <- n/2
+  }
+  
+  return(fValue)
+}
+
+jackFun(33)
+jackFun(54)
+
+```
+
+### practice1
+
+```{r}
+
+# 給定第i位學生（），計算他／她提早多久交卷？
+#   56節：下午3點截止；78節：下午5點截止
+
+examSubmissionTime <- jsonlite::fromJSON("https://www.dropbox.com/s/d14j5hp3i5ps657/examSubmissionTimes.json?dl=1")
+
+```
+
+```{r}
+
+head(examSubmissionTime$section)
+head(examSubmissionTime$time)
+
+```
+
+```{r}
+
+i <- 5
+
+examSubmissionTime$section[[i]] -> stu_i_sec
+examSubmissionTime$time[[i]] -> stu_i_time
+
+lubridate::ymd_hms(stu_i_time, tz = "Asia/Taipei") -> stu_i_time
+
+if(stu_i_sec=="56"){
+  lubridate::ymd_hms("2020-05-27 15:00:00", tz = "Asia/Taipei") - stu_i_time 
+} else{
+  lubridate::ymd_hms("2020-05-27 17:00:00", tz = "Asia/Taipei") - stu_i_time 
+}
+
+```
+
+```{r}
+
+# 寫成函數
+
+compute_earlyTime <- function(i){
+  
+  examSubmissionTime$section[[i]] -> stu_i_sec
+  examSubmissionTime$time[[i]] -> stu_i_time
+
+  lubridate::ymd_hms(stu_i_time, tz = "Asia/Taipei") -> stu_i_time
+
+  if(stu_i_sec=="56"){
+    lubridate::ymd_hms("2020-05-27 15:00:00", tz = "Asia/Taipei") - stu_i_time -> 
+      earlyTime
+  } else{
+    lubridate::ymd_hms("2020-05-27 17:00:00", tz = "Asia/Taipei") - stu_i_time -> 
+      earlyTime
+  }
+  
+  return(earlyTime)
+}
+
+```
+
+```{r}
+
+compute_earlyTime(5)
+
+```
 
 
 
