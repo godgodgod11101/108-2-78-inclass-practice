@@ -692,6 +692,60 @@ rm(sec)
 
 ```
 
+## if...else if...else
+
+不只兩種情境時：
+
+if(條件A){
+  body for A 
+} else if(條件B){
+  body for B
+} else if(條件C){
+  body for C
+} else {
+  body for otherwise
+}
+
+```{r}
+
+# 須單獨執行
+grade <- readline("請輸入你的成績（整數）： ")
+
+```
+
+```{r}
+
+if(grade >= 90){
+  print("優")
+}else if (grade >= 80 & grade <= 89){
+  print("良")
+}else if (grade >= 70 & grade <= 79){
+  print("尚可")
+} else{
+  print("待加強")
+}
+
+```
+
+```{r}
+
+grade <- 80
+
+if(grade >= 90){
+  print("優")
+}else if (grade >= 70 & grade <= 85){
+  print("尚可")
+}else if (grade >= 75 & grade <= 89){
+  print("良")
+} else{
+  print("待加強")
+}
+
+# 出現“尚可”，代表grade碰到第一個True時，程式就執行結束了，
+#   所以沒有產生又“優”又“尚可”的情況。
+# 但一般程式不會這樣設計，基本上每個情況都是互斥的。
+
+```
 
 
 
