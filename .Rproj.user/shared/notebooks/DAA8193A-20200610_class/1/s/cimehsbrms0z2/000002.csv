@@ -1,0 +1,16 @@
+"0","map(
+  numSelcet, 
+  ~ compute_earlyTime_2var(examSubmissionTime$section[[.x]], examSubmissionTime$time[[.x]])
+) %>% 
+  .[[41]]
+"
+"1","Time difference of "
+"1",""
+"1","55"
+"1",""
+"1"," "
+"1",""
+"1","secs"
+"1",""
+"1","
+"

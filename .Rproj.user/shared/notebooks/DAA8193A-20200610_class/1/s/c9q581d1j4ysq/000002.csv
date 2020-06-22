@@ -1,0 +1,7 @@
+"0","compute_earlyTime(6) %>% 
+  as.numeric(units = ""secs"")
+"
+"1","[1]"
+"1"," 4358"
+"1","
+"

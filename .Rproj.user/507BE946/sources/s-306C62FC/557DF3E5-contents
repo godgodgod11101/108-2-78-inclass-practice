@@ -162,7 +162,7 @@ convert_TaiwanDate2WesternDate <- function(twDate){
 
 ```
 
-### practice2
+### practice2 (undo)
 
 ```{r}
 
@@ -463,7 +463,7 @@ jackFun(54)
 
 ```
 
-### practice1
+### practice1 (undo)
 
 ```{r}
 
@@ -471,6 +471,8 @@ jackFun(54)
 #   56節：下午3點截止；78節：下午5點截止
 
 examSubmissionTime <- jsonlite::fromJSON("https://www.dropbox.com/s/d14j5hp3i5ps657/examSubmissionTimes.json?dl=1")
+
+# 先跑這行，等等不會有.R_Cache
 
 ```
 
@@ -504,6 +506,13 @@ if(stu_i_sec=="56"){
 
 compute_earlyTime <- function(i){
   
+  if(!exists("examSubmissionTime")){
+    jsonlite::fromJSON("https://www.dropbox.com/s/d14j5hp3i5ps657/examSubmissionTimes.json?dl=1") -> 
+      examSubmissionTime
+    
+    SOAR::Store(examSubmissionTime)
+  }
+  
   examSubmissionTime$section[[i]] -> stu_i_sec
   examSubmissionTime$time[[i]] -> stu_i_time
 
@@ -526,7 +535,164 @@ compute_earlyTime <- function(i){
 
 compute_earlyTime(5)
 
+# SOAR::Remove(examSubmissionTime)
+
 ```
+
+```{r}
+
+# transfer X.XX h/m/s to hms
+
+# compute_earlyTime(5)
+# compute_earlyTime(6)
+# compute_earlyTime(41)
+
+compute_earlyTime(6) %>% 
+  as.numeric(units = "secs")
+
+```
+
+#### 1.1
+
+```{r}
+
+# 我們可以使用function和map算出每位同學提早時間
+
+compute_earlyTime_2var <- function(stu_i_sec, stu_i_time){
+  
+  lubridate::ymd_hms(stu_i_time, tz = "Asia/Taipei") -> stu_i_time
+  
+  if(stu_i_sec=="56"){
+    lubridate::ymd_hms("2020-05-27 15:00:00", tz = "Asia/Taipei") - stu_i_time -> 
+      earlyTime
+  } else{
+    lubridate::ymd_hms("2020-05-27 17:00:00", tz = "Asia/Taipei") - stu_i_time -> 
+      earlyTime
+  }
+  
+  return(earlyTime)
+}
+
+compute_earlyTime_2var("78", "2020-05-27 16:56:00")
+
+```
+
+```{r}
+
+examSubmissionTime <- jsonlite::fromJSON("https://www.dropbox.com/s/d14j5hp3i5ps657/examSubmissionTimes.json?dl=1")
+
+```
+
+```{r}
+
+compute_earlyTime_2var(examSubmissionTime$section[[6]], examSubmissionTime$time[[6]])
+
+# map(..., ~fun(.x)) ...只能放一個物件，要如何一次引入兩個input呢？
+
+numSelcet <- 1:length(examSubmissionTime$section)
+
+map(
+  numSelcet, 
+  ~ compute_earlyTime_2var(examSubmissionTime$section[[.x]], examSubmissionTime$time[[.x]])
+) %>% 
+  .[[41]]
+
+# 小技巧：將.x前面的物件設成相同
+
+```
+
+#### 1.2 (undo)
+
+```{r}
+
+meanTime_test <- c(compute_earlyTime(5), compute_earlyTime(6), compute_earlyTime(41))
+meanTime_test
+class(meanTime_test)
+
+mean.difftime(meanTime_test)
+# 等於
+mean(meanTime_test)
+
+```
+
+```{r}
+
+# 請分別算出56節和78節交卷提早時間之mean、median
+
+map(
+  numSelcet, 
+  ~ compute_earlyTime_2var(examSubmissionTime$section[[.x]], examSubmissionTime$time[[.x]])
+) %>% 
+  unlist() %>% 
+  .[[6]]
+
+# unlist()後的元素值class變了（變numeric），算mean、median會有誤。
+
+```
+
+```{r}
+
+# 先將交卷提早時間換算成秒數
+
+map(
+  numSelcet, 
+  ~ compute_earlyTime_2var(examSubmissionTime$section[[.x]], examSubmissionTime$time[[.x]])
+) %>% 
+  map(., ~as.numeric(.x, units = "secs")) %>% 
+  unlist() -> 
+  examSubmissionTime$earlySec
+
+```
+
+```{r}
+
+earlyTime_mins <- function(sec){
+  
+  library(magrittr)
+  
+  if(sec >= 0){
+    (sec/60) %>% 
+      floor() %>% 
+      as.character() -> 
+      mins
+  } else{
+    (sec/60) %>% 
+      ceiling() %>% 
+      as.character() -> 
+      mins
+  }
+  
+  return(mins)
+}
+
+earlyTime_mins(examSubmissionTime$earlySec)    # 有問題！
+
+```
+
+```{r}
+
+sec <- 66
+if(sec >= 0){
+    floor(sec/60)
+  } else{
+    ceiling(sec/60)
+  }
+
+sec <- c(-66, 66, -66, 66, -66)
+if(sec >= 0){
+    floor(sec/60)
+  } else{
+    ceiling(sec/60)
+  }
+
+rm(sec)
+
+# Warning message:
+#   In if (sec >= 0) { : 條件的長度 > 1，因此只能用其第一元素
+
+```
+
+
 
 
 
