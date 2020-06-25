@@ -1,0 +1,411 @@
+---
+title: "Untitled"
+author: "jacky wang"
+date: "2020/6/22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+
+opts_chunk$set(echo = TRUE, message = F, warning = T, eval=T)
+
+# windows檔名不要有"-"號
+
+```
+
+```{r package, include=FALSE}
+
+library(readr)    # 資料讀入
+library(lubridate)    # 時間
+library(stringr)    # 字串
+library(glue)    # 字串拼接
+library(purrr)    # map()：重複套用函數
+library(magrittr)    # pipe
+library(codetools)    # findGlobals()：查詢函數需要哪些定義好的物件
+
+source(file = "./R_function/clear_otherPackage.R")    # 相對路徑
+
+# detach("package:stringr")    # 「收回」套件
+
+```
+
+
+
+
+
+# Conditional Execution
+
+## switch
+
+某些時候條件種類繁雜，設計多個互斥的T/F情境不易。
+此時直接以「文字」描述情境：
+
+switch(
+  實現的條件（character class）, 
+  
+  "條件1" = {    }, 
+  "條件2" = {    }, 
+     :
+     :
+  "條件n" = {    }, 
+  
+  {  Body for otherwise }
+)
+
+```{r}
+
+n <- 39
+
+# 用 “if...else if...else”
+
+if(n %% 2 == 0){
+  fValue1 <- n/2
+} else if(n %% 2 == 1){
+  fValue1 <- -(n+1)/2
+} else{
+  warning("n要整數喔")
+}
+
+print(fValue1)
+
+```
+
+```{r}
+
+n <- 66.6
+
+conditionExpression_outcome <- 
+  ifelse(n %% 2 == 0, "even", "odd") 
+
+# ifelse(test, yes, no)是超級好用／常用的函數：
+#   test：測試條件的結果（logical class） 
+#   yes：結果為True時的回傳值
+#   no：結果為False時回傳值
+
+switch(
+  conditionExpression_outcome, 
+  "even" = {fValue2 <- n/2}, 
+  "odd" = fValue2 <- -(n+1)/2,    # 只有一行指令可省略{}
+  warning("n要整數喔")    # otherwise條件
+)
+
+print(fValue2)    # 有瑕疵，永遠不可能跳到warning
+
+# function(...){....}的body若只有一行指令可省略{}，改寫成function(...) ...，
+#   只是要小心body要接在function(...)之後不可換行。
+
+```
+
+### ifelse()
+
+```{r}
+
+grades <- c(52, 77, 59, 88, 90)
+
+ifelse(grades >= 60, "及格", "不及格")
+
+```
+
+### {}好處
+
+```{r}
+
+{
+  
+  
+}    # 可伸縮
+
+# 若最後一個被執行的指令會產生print在螢幕的效果，
+#   則可以用 {...}-> 或 <-{...} 將這print的值存出來。
+
+result <-
+  {
+    x <- 2
+    y <- 3
+    
+    if(x< 3){
+      warning("x值太小")
+    } else {
+      x**y+15
+    }
+  }
+
+print(result)    # result存的是 x**y+15 or "x值太小"
+
+
+myFun <- function(x,y){
+  x**y+15
+}
+
+myFun(5,3) -> outcome
+print(outcome)
+
+```
+
+### cut()
+
+cut(x, c(a,b,c))
+
+cut將連續型數值轉成類別資料，例（上述）：
+  將 x 轉成 (a,b]、(b,c]、NA 三類的類別資料
+
+-Inf：負無窮；Inf：正無窮
+
+```{r}
+
+a <- c(1,2,3)
+print(a)
+
+cut(a, c(1,2,3))
+
+```
+
+#### practice1
+
+```{r}
+
+# 寫一個compute_letterGrade(myGrade)函數，可以依分數不同而回傳"成績"且出現"等級"。
+# 數字成績 => 英文字母成績和績等級：
+#   >=90："A"和"好棒棒"
+#   80-89："B"和"好棒"
+#   70-79："C"和"普通"
+#   <70："D"和"-_-?"
+
+
+grades <- sample(50:100, 10, replace = T)    # 從50到100中任意抽出10個樣本（抽後放回）
+grades
+
+grades %>% 
+  cut(c(-1, 69, 79, 89, 100)) -> 
+  grades_level
+# levels(grades_level)
+
+switch(
+  as.character(grades_level[[5]]), 
+  "(-1,69]" = {
+    print("-_-?"); print("D")
+  }, 
+  "(69,79]" = {
+    print("普通"); print("C") 
+  }, 
+  "(79,89]" = {
+   print("好棒"); print("B") 
+  }, 
+  "(89,100]" = {
+    print("好棒棒"); print("A") 
+  }
+) -> 
+  letter_grade
+
+letter_grade    # 只會存最後一個output（這裡是"等級"）
+
+```
+
+```{r}
+
+"D"; "-_-?"
+
+```
+
+```{r}
+
+{"D"; "-_-?"}
+
+```
+
+```{r}
+
+{print("D"); "-_-?"}
+# {}只會顯示最後一個回傳值，若要顯示其他回傳值，一定要print()。
+
+```
+
+
+```{r}
+
+# 寫成函數
+
+compute_letterGrade <- function(myGrade){
+  
+  if(!require(magrittr)){
+    install.packages("magrittr")
+  }
+  
+  library(magrittr)
+  
+  myGrade %>% 
+    cut(c(-1, 69, 79, 89, 100)) -> 
+    grades_level
+  
+  switch(
+    as.character(grades_level), 
+    "(-1,69]" = {
+      print("D"); print("-_-?")
+    }, 
+    "(69,79]" = {
+      print("C"); print("普通")
+    }, 
+    "(79,89]" = {
+      print("B"); print("好棒")
+    }, 
+    "(89,100]" = {
+      print("A"); print("好棒棒")
+    }
+  )
+}
+
+compute_letterGrade(70)
+
+```
+
+#### practice2
+
+```{r}
+
+browseURL(url = "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
+
+```
+
+```{r}
+
+# 製作管家機器人：
+#   06:00-09:00---媽媽讀《經濟學人》
+#   17:00-19:00---媽媽用foodpanda點晚餐
+#   23:30-(+1)01:00---媽媽用Spotify聽Jazz
+
+glue::glue("{today()} 23:30:00") %>% 
+  ymd_hms(tz = "Asia/Taipei") -> 
+  nowTime1
+
+glue::glue("{today()+days(1)} 01:00:00") %>% 
+  ymd_hms(tz = "Asia/Taipei") -> 
+  nowTime2
+
+class(nowTime1)
+typeof(nowTime1)    # type為double，可用cut()將nowTime1轉為類別變數
+
+```
+
+```{r}
+
+c(
+  glue("{today()} 06:00:00"), 
+  glue("{today()} 09:00:00"), 
+  glue("{today()} 17:00:00"), 
+  glue("{today()} 19:00:00"), 
+  glue("{today()} 23:30:00"), 
+  glue("{today()+days(1)} 01:00:00")
+) %>% 
+  ymd_hms(tz = "Asia/Taipei") -> 
+  cutPoints
+
+```
+
+```{r}
+
+cut(nowTime1, cutPoints) -> nowTime1
+nowTime1
+
+levels(nowTime1)[c(1, 3, 5)] <- c("morning", "evening", "night")
+nowTime1    # 開頭竟然是該類！
+
+
+cut(nowTime2, cutPoints) -> nowTime2
+nowTime2    # 尾巴竟然是別類了！
+
+levels(nowTime2)[c(1, 3, 5)] <- c("morning", "evening", "night")
+nowTime2
+
+```
+
+```{r}
+
+switch(
+  as.character(nowTime2), 
+  "morning" = {
+    print("來點國際時事？")
+    browseURL("https://economist.com")
+  }, 
+  "evening" = {
+    print("點餐？")
+    browseURL("https://www.foodpanda.com.tw/")
+  }, 
+  "night" = {
+    print("聽點Jazz。")
+    browseURL("https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt")
+  }, {
+    print("沒有任務")
+  }
+)
+
+```
+
+```{r}
+
+# 寫成函數
+
+robot_mom <- function(nowTime = now()){
+  
+  library(lubridate)
+  library(glue)
+  
+  print("請在每日01:00-06:00更新一次此函數")
+  
+  # 將character轉成date time
+  nowTime %>% 
+    ymd_hms(tz = "Asia/Taipei") -> 
+    nowTime
+  
+  # 將date time轉成類別資料
+  cutPoints <- c(
+    glue("{today()} 06:00:00"), 
+    glue("{today()} 09:00:00"), 
+    glue("{today()} 17:00:00"), 
+    glue("{today()} 19:00:00"), 
+    glue("{today()} 23:30:00"), 
+    glue("{today()+days(1)} 01:00:00")
+  ) %>% 
+    ymd_hms(tz = "Asia/Taipei")
+  
+  cut(nowTime, cutPoints) -> nowTime
+  
+  # 更換level定義（變情境描述）
+  levels(nowTime)[c(1, 3, 5)] <- c("morning", "evening", "night")
+  
+  # 產生情境對應output
+  switch(
+    as.character(nowTime), 
+    "morning" = {
+      print("來點國際時事？")
+      browseURL("https://economist.com")
+    }, 
+    "evening" = {
+      print("點餐？")
+      browseURL("https://www.foodpanda.com.tw/")
+    }, 
+    "night" = {
+      print("聽點Jazz。")
+      browseURL("https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt")
+    }, {
+    print("沒有任務")
+    }
+  )
+}
+
+robot_mom(nowTime = glue("{today()} 17:00:00"))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
