@@ -394,12 +394,129 @@ robot_mom <- function(nowTime = now()){
   )
 }
 
-robot_mom(nowTime = glue("{today()} 17:00:00"))
+# robot_mom(nowTime = glue("{today()} 08:00:00"))
 
 ```
 
+#### homework
+
+```{r}
+
+```
+
+## logical condition
+
+if...、if...else...、if...else if...else...，條件「必須」「只能」是一個T／F。
+
+```{r}
+
+myAnswer <- c(2,3,6)
+correctAnswer <- c(2,3,5)
+
+if(myAnswer == correctAnswer){
+  print("你答對了")
+}
+# warning: 條件的長度 > 1，因此只用其第一個元素
+
+Sys.setenv("_R_CHECK_LENGTH_1_CONDITION_" = "true")    # 禁止length>1的logical condition
+
+if(myAnswer == correctAnswer){
+  print("你答對了")
+}
+
+Sys.setenv("_R_CHECK_LENGTH_1_CONDITION_" = "false")
+
+```
+
+### all/any
+
+```{r}
+
+all(myAnswer == correctAnswer)    # logical vector要全為True，all(...)才會產生True。
+if(all(myAnswer == correctAnswer)){
+  print("你答對了")
+}
+
+any(myAnswer == correctAnswer)    # logical vector只要有一為True，any(...)就會產生True。
+if(any(myAnswer == correctAnswer)){
+  print("裡頭有數字是對的")
+}
 
 
+```
+
+#### practice
+
+```{r}
+
+
+
+```
+
+### &&/||
+
+兩個and／or使用時機
+
+```{r}
+
+myAnswer <- c(1,2,3)
+correctAnswer <- factor(c(1,2,3))
+
+if(is.factor(myAnswer) && all(myAnswer==correctAnswer)){
+  print("答對了")
+  10
+} else {
+  print("答錯了")
+  0
+}
+
+if(is.factor(myAnswer) & all(myAnswer==correctAnswer)){
+  print("答對了")
+  10
+} else {
+  print("答錯了")
+  0
+}
+
+# 兩者結果是一樣的，但用“&&”程式會跑比較快，
+#   原因是用“&&”時，只要碰到某條件為False，就會馬上跳到else的body，
+#   但用“&”時，每個條件都會逐一被檢查，然後再聯合判斷，最後才會跳到body的部分。
+
+```
+
+```{r}
+
+myAge <- 40
+myChildrenNumber <- 5
+
+if(myAge >=65 | myChildrenNumber >3){
+  "符合申請資格"
+} else {
+  warning("不符合申請資格")
+}
+
+if(myAge >=65 || myChildrenNumber >3){
+  "符合申請資格"
+} else {
+  warning("不符合申請資格")
+}
+
+# 兩者結果是一樣的，但用“||”程式會跑比較快，
+#   原因是用“||”時，只要碰到某條件為True，就會馬上跳到if的body。
+
+```
+
+```{r}
+
+myAge <- c(40, 40)
+myChildrenNumber <- c(3, 5)
+
+(myAge >= 65 | myChildrenNumber > 3)
+(myAge >= 65 || myChildrenNumber > 3)    # 只看第一個元素
+
+# 「條件」最好少使用“&”或“|”，因為若兩邊logical向量長度>1，結果也會是個logical向量長度>1。
+
+```
 
 
 

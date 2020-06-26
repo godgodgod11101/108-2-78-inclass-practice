@@ -1,0 +1,6 @@
+"0","if(myAnswer == correctAnswer){
+  print(""你答對了"")
+}
+"
+"2","Error in if (myAnswer == correctAnswer) { : the condition has length > 1
+"
