@@ -1,0 +1,5 @@
+"0","rm(box_of_eggs, box_of_ham, box_of_toast, output, i)"
+"2","找不到物件 'box_of_eggs'"
+"2","找不到物件 'box_of_ham'"
+"2","找不到物件 'box_of_toast'"
+"2","找不到物件 'output'"

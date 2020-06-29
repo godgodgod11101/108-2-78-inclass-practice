@@ -35,7 +35,7 @@ source(file = "./R_function/clear_otherPackage.R")    # 相對路徑
 
 
 
-# Conditional Execution
+# Conditional Execution（條件執行）
 
 ## switch
 
@@ -548,7 +548,7 @@ dplyr::case_when(
 
 ```
 
-
+# end
 
 
 

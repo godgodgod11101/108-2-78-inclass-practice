@@ -1,0 +1,678 @@
+---
+title: "Untitled"
+author: "jacky wang"
+date: "2020/6/26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+
+opts_chunk$set(echo = TRUE, message = F, warning = T, eval=T)
+
+# windows檔名不要有"-"號
+
+```
+
+```{r package, include=FALSE}
+
+library(readr)    # 資料讀入
+library(lubridate)    # 時間
+library(stringr)    # 字串
+library(glue)    # 字串拼接
+library(purrr)    # map()：重複套用函數
+library(magrittr)    # pipe
+library(codetools)    # findGlobals()：查詢函數需要哪些定義好的物件
+
+source(file = "./R_function/clear_otherPackage.R")    # 相對路徑
+
+# detach("package:stringr")    # 「收回」套件
+
+```
+
+
+
+
+
+# Iteration（反覆運算）
+
+重複三次、四次、五次...，考慮迴圈。
+
+
+
+
+
+## map()
+
+```{r}
+
+# 找出哪幾筆為"男"
+
+sampleData <- list(
+  list("男", 45), list("女", 32), list("男",50), list("男", 33), list("女", 21)
+)
+
+```
+
+```{r}
+
+# 性別只出現在每筆資料的第一個元素。取出前三筆的性別：
+
+sampleData[[1]][[1]]
+sampleData[[2]][[1]]
+sampleData[[3]][[1]]
+
+```
+
+使用map()前，copy and paste程序3次，目的在於確認：
+
+  sequence：即[[1]]、[[2]]、[[3]]...出現的位置。
+
+  body：要重覆做的SOP，即 sampleData[[?]][[1]] 。
+
+```{r}
+
+# pipe 1: external dispatch (發送)
+
+sampleData[[1]] %>% {.[[1]]}
+sampleData[[2]] %>% {.[[1]]}
+sampleData[[3]] %>% {.[[1]]}
+
+# pipe 2: internal dispatch
+
+1 %>% {sampleData[[.]][[1]]}
+2 %>% {sampleData[[.]][[1]]}
+3 %>% {sampleData[[.]][[1]]}
+
+```
+
+```{r}
+
+# 單維度反覆運算：
+
+map(1:5, ~{sampleData[[.x]][[1]]})
+# or
+# map(1:5, ~{sampleData[[.]][[1]]})    # map在單維度遞迴時，.x也可以只寫.。（不好）
+
+# map(sampleData, ~.x[[1]])    # 5/20課程內容
+
+```
+
+```{r}
+rm(sampleData)
+```
+
+```{r}
+
+eggs <- rep("雞蛋x1", 8)    # 產生length = 8的vector，元素為"雞蛋x1"。
+
+fryEgg <- function(egg){
+  str_replace(
+    string = egg, 
+    pattern = "雞蛋", 
+    replacement = "荷包蛋"
+  )
+}
+
+fryEgg(eggs[[1]])
+
+```
+
+```{r}
+
+# pipe 1: external dispatch
+
+eggs[[1]] %>% fryEgg()
+eggs[[2]] %>% fryEgg()
+
+# pipe 2: internal dispatch
+
+1 %>% {fryEgg(eggs[[.]])}
+2 %>% {fryEgg(eggs[[.]])}
+
+# Iteration
+
+eggs
+map_chr(1:8, ~{fryEgg(eggs[[.x]])})
+# map_XXX(): return an atomic vector of the XXX type
+
+```
+
+```{r}
+rm(eggs)
+```
+
+### vectorized function
+
+可以把atomic vector丟進去的函數（之前只能丟一個值）
+
+```{r}
+
+grade <- c(45, 74, NA); i <- 3
+
+grade_i <- grade[[i]]
+
+if(!is.na(grade_i)){
+  if(grade_i >= 60){
+    "Pass"
+  } else{
+    "Fail"
+  }
+} else{
+  "缺考"
+}
+
+```
+
+```{r}
+rm(i, grade, grade_i)
+```
+
+```{r}
+
+# 寫成函數
+
+pass_or_fail <- function(grade){
+  
+  if(!is.na(grade)){
+    if(grade >= 60){
+      "Pass"
+    } else{
+      "Fail"
+    }
+  } else{
+    "缺考"
+  }
+}
+
+pass_or_fail(87)
+
+```
+
+```{r}
+
+# 可否直接丟vector
+
+pass_or_fail(c(45, 74, NA))    # 條件的長度 > 1，因此只能用其第一元素
+
+```
+
+
+```{r}
+
+# 產生vectorized function
+
+grade <- c(45, 74, NA)
+
+map_chr(grade, ~{pass_or_fail(.x)})
+
+rm(grade)
+
+
+map_pass_fail <- function(grade){
+  
+  map_chr(grade, ~{pass_or_fail(.x)})
+  # 若確信map出的每個list中只有一個值，且值的class都相同，則可以依class的類形使用map_XXX
+}
+
+map_pass_fail(c(45, 74, NA, 99, 80, 52, NA))
+
+```
+
+### Internal dispatch的優勢
+
+```{r}
+
+mat_eggs <- rep("雞蛋x1", 10)
+mat_ham <- rep("火腿x1", 10)
+mat_toast <- rep("土司2片", 10)
+
+toast_withEggHam <- function(toast=NULL, egg=NULL, ham=NULL){
+  
+  if(is.null(toast) || !str_detect(toast, "土司")){stop("少了土司")}
+  
+  if(is.null(egg) || !str_detect(egg, "蛋")){stop("少了蛋")}
+  
+  if(is.null(ham) || !str_detect(ham, "火腿")){stop("少了火腿")}
+  
+  "火腿蛋三明治"
+}
+
+# pipe: internal dispatch
+
+1 %>% 
+  {toast_withEggHam(
+    toast = mat_toast[[.]], egg = mat_eggs[[.]], ham = mat_ham[[.]]
+  )}
+2 %>% 
+  {toast_withEggHam(
+    toast = mat_toast[[.]], egg = mat_eggs[[.]], ham = mat_ham[[.]]
+  )}
+
+map_chr(
+  1:10, 
+  ~{toast_withEggHam(toast = mat_toast[[.x]], egg = mat_eggs[[.x]], ham = mat_ham[[.x]])}
+)
+
+# 多變數函數，採用internal dispatch
+
+```
+
+```{r}
+rm(mat_eggs, mat_ham, mat_toast)
+```
+
+### practice
+
+```{r}
+
+jsonlite::fromJSON("https://www.dropbox.com/s/7myzzdnoor21hye/courseStructure2.json?dl=1") -> courseStructure
+
+```
+
+```{r}
+
+# 以100學年入學之經濟系學生為對象，找出這群學生大一到大四的系上課程規劃是什麼？
+
+acadYear <- as.character(100+0:3)
+majorPeriod <- paste0("經濟系", 1:4)    # 小技巧：運用 start:end 創造vector
+
+# 100學年入學之經濟系學生，1年級的系上規劃課程
+
+pick_ec100_1 <- 
+  (courseStructure$學年 == acadYear[[1]] & str_detect(courseStructure$應修系級, majorPeriod[[1]]))
+
+courseStructure$科目名稱[pick_ec100_1] %>% 
+  unique()
+
+# 100學年入學之經濟系學生，2年級的系上規劃課程
+
+pick_ec100_2 <- 
+  (courseStructure$學年 == acadYear[[2]] & str_detect(courseStructure$應修系級, majorPeriod[[2]]))
+
+courseStructure$科目名稱[pick_ec100_2] %>% 
+  unique()
+
+```
+
+```{r}
+rm(acadYear, majorPeriod, pick_ec100_1, pick_ec100_2)
+```
+
+
+```{r}
+
+# 寫成函數
+
+econ100_coursePlan <- function(acadYear, grade){
+  
+  if(!exists("courseStructure")){
+    
+    jsonlite::fromJSON("https://www.dropbox.com/s/7myzzdnoor21hye/courseStructure2.json?dl=1") -> courseStructure
+    
+    SOAR::Store(courseStructure)
+  }
+  
+  library(magrittr)
+  
+  acadYear <- as.character(acadYear)
+  majorPeriod <- paste0("經濟系", grade)
+  
+  pick_ec100_i <- 
+    (courseStructure$學年 == acadYear & str_detect(courseStructure$應修系級, majorPeriod))
+  
+  courseStructure$科目名稱[pick_ec100_i] %>% 
+    unique()
+}
+
+econ100_coursePlan(acadYear = 100, grade = 1)
+
+```
+
+```{r}
+detach(name = ".R_Cache")
+```
+
+
+```{r}
+
+# iteration
+
+acadYear1 <- c(100:103); grade1 <- c(1:4)
+
+1:4 %>% 
+  map(
+    ~{econ100_coursePlan(acadYear1[[.x]], grade1[[.x]])}
+  )
+
+```
+
+```{r}
+rm(acadYear1, grade1)
+```
+
+
+
+
+
+## for loop（迴圈）
+
+map({sequence}, ~{body})
+使用 map() 寫迴圈時，通常會將 {body} 的部分寫成一個簡單的function，
+但有時「將 {body} 的部分寫成一個簡單的function」並不容易，這時就會用for loop。
+
+```{r}
+
+# 利用前面practice，map()作法：
+
+acadYear1 <- c(100:103); grade1 <- c(1:4)
+
+# map(
+#   1:4, ~{econ100_coursePlan(acadYear1[[.x]], grade1[[.x]])}
+# )
+
+
+# for loop
+
+output <- vector("list", length=4)
+# 須先建立一個與foor loop對應length的空vector（或list），
+#   因為for loop不會自動產生list。
+
+# vector(mode, length)：
+#   mode：container內值的type（character class）
+#   length：container要有幾個空位（integer class）
+
+for(.x in 1:4){
+  econ100_coursePlan(
+    acadYear = acadYear1[[.x]], grade = grade1[[.x]]
+  ) -> 
+    output[[.x]]
+}
+# 或
+for(.x in seq_along(acadYear1)){    # seq_along(acadYear1)取代1:4
+  econ100_coursePlan(
+    acadYear = acadYear1[[.x]], grade = grade1[[.x]]
+  ) -> 
+    output[[.x]]
+}
+
+output[[2]]
+
+```
+
+```{r}
+rm(acadYear1, grade1)
+```
+
+
+### practice
+
+```{r}
+
+# 火腿蛋三明治
+
+box_of_eggs <- rep("荷包蛋x1", 10)
+box_of_ham <- rep("火腿x1", 10)
+box_of_toast <- rep("吐司兩片x1", 10)
+
+toast_withEggHam <- function(egg = NULL, ham = NULL, toast = NULL){
+  
+  if(is.null(egg) || !str_detect(egg, "蛋")){stop("沒有蛋")}
+  if(is.null(ham) || !str_detect(ham, "火腿")){stop("沒有火腿")}
+  if(is.null(toast) || !str_detect(toast, "吐司")){stop("沒有吐司")}
+  
+  "火腿蛋吐司"
+}
+
+toast_withEggHam("蛋", "火腿")    # 若沒有設NULL，會顯示「缺少引數XXX，也沒有預設值」
+
+```
+
+```{r}
+
+output <- vector("character", 10)
+
+for (i in seq_along(box_of_eggs)) {
+  toast_withEggHam(
+    egg = box_of_eggs[[i]], ham = box_of_ham[[i]], toast = box_of_toast[[i]]
+  ) -> 
+    output[[i]]
+}    # .x可亂改
+
+output
+
+```
+
+```{r}
+rm(box_of_eggs, box_of_ham, box_of_toast, output, i)
+```
+
+### 累計型output
+
+```{r}
+
+a <- sample(1:100, 10, replace = T)
+a
+
+```
+
+```{r}
+
+# 加總a
+
+sum_a <- 0
+sum_a <- a[[1]] + sum_a    # = a[[1]]
+sum_a <- a[[2]] + sum_a    # = a[[2]] + a[[1]]
+sum_a <- a[[3]] + sum_a    # = a[[3]] + a[[2]] + a[[1]]
+sum_a <- a[[4]] + sum_a
+sum_a <- a[[5]] + sum_a
+sum_a <- a[[6]] + sum_a
+sum_a <- a[[7]] + sum_a
+sum_a <- a[[8]] + sum_a
+sum_a <- a[[9]] + sum_a
+sum_a <- a[[10]] + sum_a
+sum_a
+
+```
+
+```{r}
+
+# pipe
+
+sum_a <- 0
+1 %>% {a[[.]] + sum_a} -> sum_a    # = a[[1]]
+2 %>% {a[[.]] + sum_a} -> sum_a    # = a[[2]] + a[[1]]
+3 %>% {a[[.]] + sum_a} -> sum_a    # = a[[3]] + a[[1]]
+4 %>% {a[[.]] + sum_a} -> sum_a
+5 %>% {a[[.]] + sum_a} -> sum_a
+6 %>% {a[[.]] + sum_a} -> sum_a
+7 %>% {a[[.]] + sum_a} -> sum_a
+8 %>% {a[[.]] + sum_a} -> sum_a
+9 %>% {a[[.]] + sum_a} -> sum_a
+10 %>% {a[[.]] + sum_a} -> sum_a
+sum_a
+
+```
+
+```{r}
+
+sum_a <- 0    # container
+
+for (.x in 1:10) {
+  sum_a <- a[[.x]] + sum_a
+}
+
+sum_a
+sum(a)
+
+```
+
+```{r}
+rm(a, sum_a)
+```
+
+### 長度不定型output
+
+```{r}
+
+output <- c()
+
+
+num1 <- sample(1:100, 1)
+
+if(num1  %% 3 == 0){
+  output <- c(output, num1)
+}
+output
+
+
+num1 <- sample(1:100, 1)
+
+if(num1  %% 3 == 0){
+  output <- c(output, num1)
+}
+output
+
+
+num1 <- sample(1:100, 1)
+
+if(num1  %% 3 == 0){
+  output <- c(output, num1)
+}
+output
+
+```
+
+```{r}
+
+output <- c()
+
+for (.x in 1:10) {    # .x不存在於body內容裡，代表重複執行一樣的動作
+  
+  num1 <- sample(1:100, 1)
+
+  if(num1  %% 3 == 0){
+    output <- c(output, num1)
+  }
+}
+
+output
+
+```
+
+```{r}
+rm(num1, output)
+```
+
+### next
+
+```{r}
+
+list(
+  list("student A", c(2,3,4,5)),
+  list("student B", NA), # 沒交作業
+  list("student C", factor(c(2,3,4,5))),
+  list("student D", factor(c(2,3,5)))
+) -> collectionHWs
+
+correctAns <- factor(c(2,3,4,5))
+
+
+# 對答案程式
+
+# 學生1成績
+stuAns <- collectionHWs[[1]][[2]]
+
+if(identical(stuAns, correctAns)){
+  print(10)
+} else if(
+  class(stuAns) != class(correctAns) && 
+  identical(as.character(stuAns), as.character(correctAns)) 
+  ){
+  print(5)
+} else{
+  print(0)
+}
+
+```
+
+```{r}
+
+correctAns <- factor(c(2,3,4,5))
+
+nameVector <- vector("character", length = length(collectionHWs))    # 製作name vector
+output <- vector("integer", length = length(collectionHWs))
+
+for(.x in seq_along(collectionHWs)){
+  
+  nameVector[[.x]] <- collectionHWs[[.x]][[1]]
+  
+  stuAns <- collectionHWs[[.x]][[2]]
+  
+  # 如果學生答案是NA，直接給0分，並改下一位
+  if(length(stuAns) == 1){
+    if(is.na(stuAns)){
+      output[[.x]] <- 0
+      next    # 不會再跑下方的程式了，換下一筆資料（增加程式效率）
+    }
+  }
+  
+  if(identical(stuAns, correctAns)){
+    output[[.x]] <- 10
+  } else if(
+    class(stuAns) != class(correctAns) && 
+    identical(as.character(stuAns), as.character(correctAns)) 
+    ){
+    output[[.x]] <- 5
+  } else{
+    output[[.x]] <- 0
+  }
+}
+
+names(output) <- nameVector
+
+output
+
+```
+```{r}
+rm(correctAns, nameVector, output, stuAns)
+```
+
+
+```{r}
+
+# 竟然沒用！
+
+# correctAns <- factor(c(2,3,4,5))
+# 
+# nameVector <- vector("character", length = length(collectionHWs))
+# output <- vector("integer", length = length(collectionHWs))
+# 
+# 1 %>% {
+#   
+#   collectionHWs[[.]][[1]] -> nameVector[[.]]
+#   collectionHWs[[.]][[2]] -> stuAns
+#   
+#   if(identical(stuAns, correctAns)){
+#     output[[.]] <- 10
+#   } else if(
+#     class(stuAns) != class(correctAns) && 
+#     identical(as.character(stuAns), as.character(correctAns)) 
+#     ){
+#     output[[.]] <- 5
+#   } else{
+#     output[[.]] <- 0
+#   }
+# }
+# 
+# output
+
+
+```
+
+
+
+# end
+
+
