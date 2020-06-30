@@ -673,6 +673,300 @@ rm(correctAns, nameVector, output, stuAns)
 
 
 
+
+
+## while loop
+
+```{r}
+
+# 擲一銅板3次，並計算有幾次正面
+
+count_toss <- 0    # 擲了幾次
+sum_tossP <- 0    # 總共幾次正面
+
+# 1st toss
+count_toss <- count_toss + 1
+
+new_toss <- sample(c("正", "反"), 1)
+print(new_toss)
+
+if(new_toss == "正"){
+  sum_tossP <- sum_tossP + 1
+}
+
+# 2nd toss
+count_toss <- count_toss + 1
+
+new_toss <- sample(c("正", "反"), 1)
+print(new_toss)
+
+if(new_toss == "正"){
+  sum_tossP <- sum_tossP + 1
+}
+
+# 3rd toss
+count_toss <- count_toss + 1
+
+new_toss <- sample(c("正", "反"), 1)
+print(new_toss)
+
+if(new_toss == "正"){
+  sum_tossP <- sum_tossP + 1
+}
+
+```
+
+```{r}
+rm(count_toss, new_toss, sum_tossP)
+```
+
+
+```{r}
+
+# 擲一銅板100次，並計算有幾次正面
+
+count_toss <- 0
+sum_tossP <- 0
+record_toss <- vector("character", length = 100)
+
+for (.x in 1:100) {
+  
+  count_toss <- count_toss + 1    # 計數器
+  
+  record_toss[[.x]] <- sample(c("正", "反"), 1)
+  
+  if(record_toss[[.x]] == "正"){
+    sum_tossP <- sum_tossP + 1
+  }
+}
+
+count_toss
+(record_toss == "正") %>% as.integer(.) %>% sum(.)
+sum_tossP
+
+```
+
+```{r}
+rm(count_toss, record_toss, sum_tossP)
+```
+
+
+```{r}
+
+# 擲一銅板直到出現5次正面才停止
+
+count_toss <- 0
+sum_tossP <- 0
+
+for (.x in 1:100) {    # 若沒有5次正面，最多也只會擲100次
+  
+  count_toss <- count_toss + 1    # 計數器
+  
+  new_toss <- sample(c("正", "反"), 1)
+  
+  if(new_toss == "正"){
+    sum_tossP <- sum_tossP + 1
+  }
+  
+  if(sum_tossP == 5){
+    break    # 若出現5次正面了，請停止迴圈（跳出迴圈條件）
+  }
+}
+
+count_toss
+sum_tossP    # 87%是5
+new_toss    # 最後一次一定是"正"
+
+```
+
+```{r}
+rm(count_toss, new_toss, sum_tossP)
+```
+
+```{r}
+
+# while loop其實等於for loop + break（但for loop需要設反覆次數）
+
+count_toss <- 0
+sum_tossP <- 0
+
+while(sum_tossP < 5){    # 留在迴圈內條件（True則繼續執行body）
+  
+  count_toss <- count_toss + 1    # 計數器
+  
+  new_toss <- sample(c("正", "反"), 1)
+  
+  if(new_toss == "正"){
+    sum_tossP <- sum_tossP + 1
+  }
+}
+
+count_toss
+sum_tossP    # 100%是5
+new_toss    # 最後一次一定是"正"
+
+```
+
+```{r}
+rm(count_toss, new_toss, sum_tossP)
+```
+
+### 保險設計
+
+```{r}
+
+# 由於while loop並沒有執行次數上限，若沒設好條件（使得condition一直為True），
+#   程式會一直跑下去，造成電腦鎖死。
+#   為避免此問題，一般我們會設定計數器，並在條件裡多加入計數上限條件。
+
+count_toss <- 0
+sum_tossP <- 0
+
+max_count <- 50    # 設定計數器1
+
+while(sum_tossP < 5 && count_toss < max_count){    # 加入計數上限
+  
+  count_toss <- count_toss + 1    # 計數器2
+  
+  new_toss <- sample(c("正", "反"), 1)
+  
+  if(new_toss == "正"){
+    sum_tossP <- sum_tossP + 1
+  }
+}
+
+```
+
+```{r}
+rm(count_toss, new_toss, sum_tossP, max_count)
+```
+
+### 有限迴圈改用while寫
+
+```{r}
+
+sample(1:100, 10, replace = T)
+sample(1:100, 10, replace = T)
+
+```
+
+```{r}
+
+set.seed(0608)    # 讓相同的隨機數重複產生
+sample(1:100, 10, replace = T)
+sample(1:100, 10, replace = T)
+
+```
+
+```{r}
+
+# 每次抽一個介於1到100的數字（抽後放回）抽10次，並將3的倍數的數字留下來
+
+# for loop
+
+output <- c()
+
+set.seed(10)
+
+for (.x in 1:10) {
+  
+  new <- sample(1:100, 1, replace = T)
+  
+  if(new %% 3==0){
+    output <- c(output, new)
+  }
+}
+
+output
+
+```
+
+```{r}
+
+# while loop
+
+count <- 0 # 計數器
+output <- c()
+
+set.seed(10)
+
+while(count < 10){    # 計數上限條件
+  
+  count <- count + 1    # 計數器
+  
+  new <- sample(1:100, 1, replace = T)
+  
+  if(new %% 3==0){
+    output <- c(output, new)
+  }
+}
+
+print(output)
+
+# for轉while，多了設定次數上限的步驟
+
+```
+
+```{r}
+rm(count, new, output)
+```
+
+```{r}
+
+# 從1~100任意抽10個數字（抽後放回）作加總
+
+# for loop
+
+sum_b <- 0
+
+set.seed(111)
+b <- sample(1:100, 10, replace = T)
+b
+
+for (.x in 1:10) {
+  
+  sum_b <- sum_b + b[[.x]]
+}
+
+sum_b
+
+```
+
+```{r}
+
+sum_b <- 0
+count <- 0
+
+set.seed(111)
+
+while(count < 10){
+  
+  count <- count + 1
+  
+  b <- sample(1:100, 1, replace = T)
+  
+  sum_b <- sum_b + b
+}
+
+sum_b
+
+```
+
+```{r}
+rm(b, count, sum_b)
+```
+
+```{r}
+
+# 幾乎每一個iteration都可以用map()、for loop、while loop寫，
+#   但若沒有追求時間效率的需求，還是以符合直覺的寫法優先，日後維護也比較能進入狀況。
+
+```
+
+
+
+
+
 # end
 
 
