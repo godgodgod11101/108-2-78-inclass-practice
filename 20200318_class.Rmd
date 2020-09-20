@@ -165,7 +165,7 @@ vNum4 <- c(vNum4, vNum1)
 
 # 若反覆操作，它們會有什麼變化？
 
-vNum4 <- c(vNum4, vNum1)    # 向量疊代（recursive vector concatenate）
+vNum4 <- c(vNum4, vNum1)    # 向量迭代（recursive vector concatenate）
 
 ```
 

@@ -1,0 +1,170 @@
+---
+title: "weather forcast function"
+author: "jacky wang"
+date: "2020/9/19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+
+opts_chunk$set(echo = TRUE, message = F, warning = T, eval=T)
+
+# windows檔名不要有"-"號
+
+```
+
+```{r package, include=FALSE}
+
+library(dplyr)
+library(stringr)
+library(glue)
+
+```
+
+
+
+
+
+# weather forcast
+
+```{r}
+
+jsonlite::fromJSON("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/F-C0032-001?Authorization=rdec-key-123-45678-011121314&format=JSON") ->
+  weather_next36hours
+
+```
+
+## helping fun
+
+```{r}
+
+easyReadDate <- function(utcTime){
+  
+  utcTime %>% 
+    str_extract_all(
+      pattern = "[:digit:]+"
+    ) %>% 
+    .[[1]] %>% 
+    as.vector() %>% 
+    .[c(1:3)] %>% 
+    str_c(collapse = "/") -> 
+    date
+  
+  return(date)
+}
+
+easyReadTime <- function(utcTime){
+  
+  utcTime %>% 
+    str_extract_all(
+      pattern = "[:digit:]+"
+    ) %>% 
+    .[[1]] %>% 
+    as.vector() %>% 
+    .[c(4, 5)] %>% 
+    str_c(collapse = ":") -> 
+    hour
+  
+  return(hour)
+}
+
+```
+
+## main fun
+
+```{r}
+
+weather_forcast <- function(weather_loc){
+  
+  
+  # 將"台"換"臺"
+  
+  if(str_detect(weather_loc, pattern = "[台]")){
+    weather_loc <- str_replace(weather_loc, pattern = "台", replacement = "臺")
+  }
+  
+  
+  # 檢查使用者是否輸入正確名稱
+  
+  loc_name <- weather_next36hours$cwbopendata$dataset$location$locationName %>% 
+    str_c(collapse = "、")
+  
+  if(
+    weather_next36hours$cwbopendata$dataset$location$locationName %>% 
+      str_detect(., pattern = weather_loc) %>% 
+      sum() == 0
+  ){
+    return(
+      glue("out of boundries! choose the right name as below: \n {loc_name}")
+    )
+  } else{
+    # 取出該縣市的資料編號
+    weather_num <- which(weather_next36hours$cwbopendata$dataset$location$locationName == weather_loc)
+    
+    
+    # 用資料編號取出天氣狀況
+    
+    weather_condition <- weather_next36hours$cwbopendata$dataset$location$weatherElement[[weather_num]]$time[[1]]$parameter$parameterName[[1]]
+    
+    
+    # 用資料編號取出天氣狀況對應之時段
+    
+    weather_sTime <- weather_next36hours$cwbopendata$dataset$location$weatherElement[[weather_num]]$time[[1]]$startTime[[1]]
+    
+    sTime_date <- easyReadDate(weather_sTime)
+    sTime_hour <- easyReadTime(weather_sTime)
+    
+    weather_eTime <- weather_next36hours$cwbopendata$dataset$location$weatherElement[[weather_num]]$time[[1]]$endTime[[1]]
+    eTime_date <- easyReadDate(weather_eTime)
+    eTime_hour <- easyReadTime(weather_eTime)
+    
+    
+    # return天氣狀況
+    
+    return(
+      glue("{weather_loc}{sTime_date} {sTime_hour}到{eTime_date} {eTime_hour}，天氣為「{weather_condition}」")
+    )
+  }
+  
+  
+}
+
+```
+
+
+
+# test1
+
+```{r}
+
+weather_next36hours$cwbopendata$dataset$location$locationName
+which(weather_next36hours$cwbopendata$dataset$location$locationName == "澎湖縣")
+
+```
+
+```{r}
+
+weather_forcast("澎湖縣")
+weather_next36hours$cwbopendata$dataset$location$weatherElement[[20]]$time[[1]]$parameter$parameterName[[1]]
+
+```
+
+
+
+# test2
+
+```{r}
+
+weather_forcast("你好")
+weather_forcast("桃園市")
+weather_forcast("台北市")
+
+
+```
+
+
+
+
+

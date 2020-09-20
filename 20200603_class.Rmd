@@ -26,8 +26,10 @@ library(magrittr)
 
 ```
 
+**連結**
 
-
+https://opendata.culture.tw/ --> 文化資料開放服務網
+https://opendata.cwb.gov.tw/index --> 氣象資料開放平台
 
 
 # Function
@@ -96,6 +98,18 @@ print(q_d)
 ```{r}
 
 # 請寫下供給函數 q_s = 0 + 2p
+
+supply <- function(p = 1){
+  if(p < 0){
+    warning("The price can't  be less than or equal to 0! " )
+  } else{
+    q_s = 0 + 2*p
+    return(q_s)
+  }
+}
+
+supply()
+supply(p = 4)
 
 ```
 
